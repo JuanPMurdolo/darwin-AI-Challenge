@@ -16,9 +16,6 @@ class ExpenseRepository:
         try:
             async with AsyncSessionLocal() as session:
                 result = await session.execute(select(User).where(User.telegram_id == telegram_id))
-                print(f"User query result: {result}"
-                      f" for telegram_id: {telegram_id}"
-                      f" with text: {text}")
                 user = result.scalar_one_or_none()
 
                 #if not user:
