@@ -1,13 +1,20 @@
--- This file will be automatically executed when the PostgreSQL container starts
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  telegram_id TEXT UNIQUE NOT NULL
+);
 
--- Create the database (already created by POSTGRES_DB)
--- CREATE DATABASE expense_bot;
+CREATE TABLE IF NOT EXISTS expenses (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  description TEXT NOT NULL,
+  amount MONEY NOT NULL,
+  category TEXT NOT NULL,
+  added_at TIMESTAMP NOT NULL
+);
 
--- Connect to the database
-\c expense_bot;
-
--- The tables will be created automatically by the Python application
--- This file is just for any additional setup if needed
-
--- You can add test data here if you want
--- INSERT INTO users (telegram_id, username, first_name) VALUES ('123456789', 'testuser', 'Test User');
+-- Agregar tus IDs de Telegram permitidos
+INSERT INTO users (telegram_id)
+VALUES 
+  ('123456789'),
+  ('987654321')
+ON CONFLICT (telegram_id) DO NOTHING;
