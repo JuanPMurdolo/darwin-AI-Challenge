@@ -18,8 +18,8 @@ class ExpenseRepository:
                 result = await session.execute(select(User).where(User.telegram_id == telegram_id))
                 user = result.scalar_one_or_none()
 
-                if not user:
-                    return {"message": "Unauthorized"}
+                #if not user:
+                #    return {"message": "Unauthorized"}
 
                 parsed = await categorize_expense(text)
                 if not parsed or len(parsed) != 3:
