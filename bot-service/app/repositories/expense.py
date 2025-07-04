@@ -24,6 +24,8 @@ class ExpenseRepository:
                 parsed = await categorize_expense(text)
                 if not parsed or len(parsed) != 3:
                     return {"message": "Not an expense"}
+                
+                print(parsed)
 
                 category, amount, description = parsed
 
