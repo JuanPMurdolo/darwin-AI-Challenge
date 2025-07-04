@@ -41,7 +41,9 @@ class ExpenseRepository:
                 )
 
                 session.add(expense)
+                print("Expense added:", expense)
                 await session.commit()
+                print("Expense committed to DB")
                 return {"message": f"{category} expense added ✅"}
 
         except Exception as e:
