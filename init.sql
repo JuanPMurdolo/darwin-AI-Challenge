@@ -17,8 +17,8 @@ CREATE TABLE IF NOT EXISTS expenses (
 );
 
 -- Agregar tus IDs de Telegram permitidos
-INSERT INTO users (telegram_id)
+INSERT INTO users (telegram_id, username, email, full_name)
 VALUES 
   ('JotapeJoplin'),
-  ('987654321')
+  ('5440711730', "Juan", "testing@testing.com", "Juan Perez"),
 ON CONFLICT (telegram_id) DO NOTHING;
