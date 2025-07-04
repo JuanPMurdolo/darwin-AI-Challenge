@@ -215,3 +215,5 @@ curl -X POST http://localhost:8000/process-message \
 2. **Database connection errors**: Verify DATABASE_URL and database accessibility
 3. **OpenAI API errors**: Check API key and rate limits
 4. **Telegram webhook issues**: Ensure bot token is correct and bot is started
+
+This was tested on Railway https://railway.com/new
