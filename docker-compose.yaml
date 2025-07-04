@@ -1,22 +1,46 @@
+version: '3.8'
+
 services:
   postgres:
     image: postgres:15
-    container_name: expense_bot_postgres
+    container_name: expenses-db
     environment:
-      POSTGRES_DB: expense_bot
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: expenses_user
+      POSTGRES_PASSWORD: expenses_pass
+      POSTGRES_DB: expenses_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d expense_bot"]
+      test: ["CMD", "pg_isready", "-U", "expenses_user"]
       interval: 10s
       timeout: 5s
       retries: 5
-    restart: unless-stopped
+
+  bot-service:
+    build: ./bot-service
+    container_name: bot-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ./bot-service/.env
+    ports:
+      - "8000:8000"
+    restart: always
+
+  connector-service:
+    build: ./connector-service
+    container_name: connector-service
+    depends_on:
+      - bot-service
+    env_file:
+      - ./connector-service/.env
+    ports:
+      - "3000:3000"
+    restart: always
 
 volumes:
   postgres_data:
