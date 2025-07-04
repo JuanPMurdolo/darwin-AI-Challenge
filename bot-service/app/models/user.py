@@ -1,10 +1,15 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy import Column, Integer, Text
+from sqlalchemy import Column, Integer, String, Boolean
 from app.models.base import Base
 
 class User(Base):
     
     __tablename__ = "users"
+
     id = Column(Integer, primary_key=True)
-    username = Column(Text, unique=True, nullable=False)
-    telegram_id = Column(Text, unique=True, nullable=False)
+    username = Column(String, unique=True, nullable=False)  # ✅ ESTA
+    email = Column(String)
+    full_name = Column(String)
+    hashed_password = Column(String)
+    is_active = Column(Boolean, default=True)
+    type = Column(String)
