@@ -1,4 +1,4 @@
-from langchain.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage
 from langchain.schema import HumanMessage
 from app.core.config import OPENAI_API_KEY
@@ -18,8 +18,11 @@ async def categorize_expense(message: str) -> tuple[str, float, str] | None:
         "Response: Food, 20, Pizza\n\n"
         f"Input: {message}"
     )
-    response = await llm.ainvoke(prompt)
-    result = response
+    response = await llm.ainvoke(HumanMessage(content=prompt))
+    
+    parsed = response.content.strip().split(",")
+    if len(parsed) != 3:
+        return None
     
     try:
         category, amount, description = [x.strip() for x in response.split(",")]
