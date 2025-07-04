@@ -1,7 +1,7 @@
 #Generate main
 from fastapi import FastAPI
 from app.routes.expense import router as expense_router
-from app.core.db import init_db, create_admin
+from app.core.db import init_db
 app = FastAPI(
     title= "Darwin AI Bot Service",
     description= "API for managing expenses in the Darwin AI Bot Service",
