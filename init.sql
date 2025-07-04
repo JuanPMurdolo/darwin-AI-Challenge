@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS expenses (
   id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL REFERENCES users(id),
   description TEXT NOT NULL,
+  telegram_id TEXT NOT NULL,
   amount MONEY NOT NULL,
   category TEXT NOT NULL,
   added_at TIMESTAMP NOT NULL

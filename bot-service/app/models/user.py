@@ -8,5 +8,6 @@ class User(Base):
 
     id = Column(Integer, primary_key=True)
     username = Column(String, unique=True, nullable=False)  # ✅ ESTA
+    telegram_id = Column(String, unique=True, nullable=True)
     email = Column(String)
     full_name = Column(String)
