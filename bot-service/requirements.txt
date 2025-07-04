@@ -5,6 +5,7 @@ sqlalchemy
 langchain
 langchain-community
 langchain-openai
+langchain_core
 openai
 python-dotenv
 sqlalchemy-utils
