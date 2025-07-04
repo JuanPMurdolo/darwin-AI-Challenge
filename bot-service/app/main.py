@@ -11,8 +11,6 @@ app = FastAPI(
 @app.on_event("startup")
 async def startup_event():
     await init_db()
-    await create_admin()  # Ensure admin user is created on startup
-
 
 # Include the expense router
 app.include_router(expense_router)

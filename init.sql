@@ -1,6 +1,9 @@
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   telegram_id TEXT UNIQUE NOT NULL
+  username TEXT UNIQUE NOT NULL,
+  email TEXT,
+  full_name TEXT,
 );
 
 CREATE TABLE IF NOT EXISTS expenses (
