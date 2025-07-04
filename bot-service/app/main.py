@@ -17,4 +17,4 @@ async def startup_event():
 
 # Include the expense router
 app.include_router(expense_router)
-app.include_router(expense_router, prefix="/expense", tags=["Expense"])
+app.include_router(health_router)
