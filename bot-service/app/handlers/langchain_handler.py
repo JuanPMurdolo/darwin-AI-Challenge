@@ -14,13 +14,11 @@ async def categorize_expense(text: str):
     prompt = f"""Categoriza este gasto: {text}. Devuelve solo: categoría, monto, descripción."""
     
     try:
-        #response = await llm.ainvoke([HumanMessage(content=prompt)])
-        response = "Food"
-        #parsed = response.content.strip().split(",")
-        #if len(parsed) != 3:
-        #    return None
-        #return [s.strip() for s in parsed]
-        return [response, 100.0, "Sample description"]
+        response = await llm.ainvoke([HumanMessage(content=prompt)])
+        parsed = response.content.strip().split(",")
+        if len(parsed) != 3:
+            return None
+        return [s.strip() for s in parsed]
     except Exception as e:
         print(f"LangChain error: {e}")
         return None
