@@ -1,9 +1,10 @@
 
 from app.services.expense import ExpenseService
-from fastapi import APIRouter, Request, logger
+from fastapi import APIRouter, Request
+import logging
 
 router = APIRouter(prefix="/expense", tags=["Expense"])
-
+logger = logging.getLogger(__name__)
 
 @router.post("/add")
 async def add_expense(request: Request):
