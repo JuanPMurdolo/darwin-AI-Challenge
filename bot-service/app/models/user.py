@@ -10,6 +10,3 @@ class User(Base):
     username = Column(String, unique=True, nullable=False)  # ✅ ESTA
     email = Column(String)
     full_name = Column(String)
-    hashed_password = Column(String)
-    is_active = Column(Boolean, default=True)
-    type = Column(String)
