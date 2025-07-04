@@ -28,6 +28,10 @@ async def init_db():
 async def get_db():
     async with AsyncSessionLocal() as session:
         yield session
+        
+async def async_session():
+    async with AsyncSessionLocal() as session:
+        yield session
 
 async def create_admin():
     async with AsyncSessionLocal() as session:
