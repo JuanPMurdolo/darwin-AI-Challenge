@@ -17,8 +17,10 @@ class ExpenseRepository:
             async with AsyncSessionLocal() as session:
                 result = await session.execute(select(User).where(User.telegram_id == telegram_id))
                 user = result.scalar_one_or_none()
+                print("Lookig for user with telegram_id:", telegram_id)
 
                 if not user:
+                    print("❌ User not found")
                     return {"message": "Unauthorized"}
                 print("User found:", user)
                 
