@@ -11,7 +11,7 @@ CATEGORIES = [
 ]
 
 async def categorize_expense(text: str):
-    prompt = f"""Categoriza este gasto: {text}. Devuelve solo: categoría, monto, descripción."""
+    prompt = f"""Categorize this expend: {text}. Return only: category, amount, description."""
     
     try:
         response = await llm.ainvoke([HumanMessage(content=prompt)])
