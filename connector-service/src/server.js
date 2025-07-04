@@ -18,14 +18,13 @@ app.get("/health", (req, res) => {
 })
 
 
-const bot = new ExpenseBot();
-bot.start();
-
-
 // Start server
 const server = app.listen(config.server.port, () => {
   logger.info(`Connector service listening on port ${config.server.port}`)
 })
+
+const bot = new ExpenseBot();
+bot.start();
 
 // Graceful shutdown
 process.on("SIGTERM", () => {

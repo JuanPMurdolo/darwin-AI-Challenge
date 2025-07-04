@@ -13,33 +13,36 @@ class ExpenseRepository:
         pass
 
     async def add_expense(self, user_id: int, description: str, amount: float, category: str, telegram_id: str, text: str):
-        async with async_session() as session:
-            result = await session.execute(select(User).where(User.telegram_id == telegram_id))
-            user = result.scalar_one_or_none()
-
-            if not user:
-                return {"message": "Unauthorized"}
-
-            parsed = await categorize_expense(text)
-            if not parsed:
-                return {"message": "Not an expense"}
-
-            category, amount, description = parsed
-            expense = Expense(
-                user_id=user.id,
-                description=description,
-                amount=amount,
-                category=category,
-                added_at=datetime.utcnow()
-            )
         try:
-            session.add(expense)
-            await session.commit()
-            return {"message": f"{category} expense added ✅"}
+            async with async_session() as session:
+                result = await session.execute(select(User).where(User.telegram_id == telegram_id))
+                user = result.scalar_one_or_none()
+    
+                if not user:
+                    return {"message": "Unauthorized"}
+    
+                parsed = await categorize_expense(text)
+                if not parsed or len(parsed) != 3:
+                    return {"message": "Not an expense"}
+    
+                category, amount, description = parsed
+    
+                expense = Expense(
+                    user_id=user.id,
+                    description=description,
+                    amount=amount,
+                    category=category,
+                    added_at=datetime.utcnow()
+                )
+    
+                session.add(expense)
+                await session.commit()
+                return {"message": f"{category} expense added ✅"}
+    
         except Exception as e:
-            await session.rollback()
+            import traceback
+            traceback.print_exc()
             return {"message": f"Error adding expense: {str(e)}"}
-        
     async def get_expenses(self, user_id: int):
         async with async_session() as session:
             result = await session.execute(select(User).where(User.id == user_id))
@@ -90,3 +93,4 @@ class ExpenseRepository:
 
             await session.commit()
             return {"message": "Expense updated successfully"}
+        
