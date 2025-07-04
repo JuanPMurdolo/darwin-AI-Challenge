@@ -1,12 +1,11 @@
 #Generate main
 from fastapi import FastAPI
 from app.routes.expense import router as expense_router
-from app.core.config import settings
 from app.core.db import init_db, create_admin
 app = FastAPI(
-    title=settings.PROJECT_NAME,
-    description=settings.PROJECT_DESCRIPTION,
-    version=settings.PROJECT_VERSION,
+    title= "Darwin AI Bot Service",
+    description= "API for managing expenses in the Darwin AI Bot Service",
+    version= "1.0.0",
 )
 
 @app.on_event("startup")
