@@ -10,7 +10,7 @@ export const config = {
     url: process.env.BOT_SERVICE_URL || "http://localhost:8000",
   },
   server: {
-    port: process.env.PORT || 3000,
+    port: process.env.PORT || 3000
   },
   environment: process.env.NODE_ENV || "development",
 }
