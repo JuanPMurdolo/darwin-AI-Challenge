@@ -3,6 +3,7 @@ uvicorn[standard]
 asyncpg
 sqlalchemy
 langchain
+langchain-community
 openai
 python-dotenv
 sqlalchemy-utils
