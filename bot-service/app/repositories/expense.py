@@ -20,13 +20,16 @@ class ExpenseRepository:
 
                 if not user:
                     return {"message": "Unauthorized"}
-
+                print("User found:", user)
+                
+                # Check if the user exists
+                # if not user:
+                print("Text to categorize", text)
                 parsed = await categorize_expense(text)
                 if not parsed or len(parsed) != 3:
                     return {"message": "Not an expense"}
                 
-                print(parsed)
-
+                print("Parsed expense:", parsed)
                 category, amount, description = parsed
 
                 expense = Expense(
