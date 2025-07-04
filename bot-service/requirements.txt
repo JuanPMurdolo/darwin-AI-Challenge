@@ -4,6 +4,7 @@ asyncpg
 sqlalchemy
 langchain
 langchain-community
+langchain-openai
 openai
 python-dotenv
 sqlalchemy-utils

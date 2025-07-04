@@ -2,7 +2,7 @@
 from app.services.expense import ExpenseService
 from fastapi import APIRouter, Request
 
-router = APIRouter("/expense", tags=["Expense"])
+router = APIRouter(prefix="/expense", tags=["Expense"])
 
 
 @router.post("/add")
