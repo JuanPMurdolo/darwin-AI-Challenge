@@ -1,6 +1,7 @@
 import express from "express"
 import { config } from "./config.js"
 import { logger } from "./utils/logger.js"
+import './bot.js'
 
 const app = express()
 
@@ -15,6 +16,11 @@ app.get("/health", (req, res) => {
     timestamp: new Date().toISOString(),
   })
 })
+
+
+const bot = new ExpenseBot();
+bot.start();
+
 
 // Start server
 const server = app.listen(config.server.port, () => {
