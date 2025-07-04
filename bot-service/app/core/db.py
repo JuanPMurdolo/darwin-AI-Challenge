@@ -8,27 +8,29 @@ from dotenv import load_dotenv
 from passlib.context import CryptContext
 from sqlalchemy import select
 
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
+# Cargar variables de entorno
 load_dotenv()
 
+# Validar URL de DB
 DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise ValueError("❌ DATABASE_URL is not set in the environment.")
 
+# Configurar SQLAlchemy Async
 engine = create_async_engine(DATABASE_URL, echo=False)
 
 AsyncSessionLocal = sessionmaker(
-    bind=engine, class_=AsyncSession, expire_on_commit=False
+    bind=engine,
+    class_=AsyncSession,
+    expire_on_commit=False
 )
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 async def init_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-async def get_db():
-    async with AsyncSessionLocal() as session:
-        yield session
-        
 async def async_session():
     async with AsyncSessionLocal() as session:
         yield session
