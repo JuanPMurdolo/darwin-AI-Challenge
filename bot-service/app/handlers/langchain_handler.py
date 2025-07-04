@@ -9,17 +9,20 @@ CATEGORIES = [
     "Medical/Healthcare", "Savings", "Debt", "Education", "Entertainment", "Other"
 ]
 
+#async def categorize_expense(text: str):
+#    prompt = f"""Categorize this expense: {text}. Return only: category, amount, description."""
+#    
+#    try:
+#        message = HumanMessage(content=prompt)
+#        response = await llm.ainvoke(message)
+#        parsed = response.content.strip().split(",")
+#        print("Categorized:", parsed)
+#        if len(parsed) != 3:
+#            return None
+#        return [s.strip() for s in parsed]
+#    except Exception as e:
+#        print(f"LangChain error: {e}")
+#        return None
 async def categorize_expense(text: str):
-    prompt = f"""Categorize this expense: {text}. Return only: category, amount, description."""
-    
-    try:
-        message = HumanMessage(content=prompt)
-        response = await llm.ainvoke(message)
-        parsed = response.content.strip().split(",")
-        print("Categorized:", parsed)
-        if len(parsed) != 3:
-            return None
-        return [s.strip() for s in parsed]
-    except Exception as e:
-        print(f"LangChain error: {e}")
-        return None
+    print(f"Mock categorize called with: {text}")
+    return ["Food", 20.0, "Pizza"]
