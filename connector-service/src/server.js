@@ -1,7 +1,7 @@
 import express from "express"
 import { config } from "./config.js"
 import { logger } from "./utils/logger.js"
-import './bot.js'
+import { ExpenseBot } from "./bot.js";
 
 const app = express()
 
