@@ -2,7 +2,8 @@
 
 
 from app.core.db import async_session
-from app.models import Expense, User
+from app.models.user import User
+from app.models.expense import Expense
 from app.handlers.langchain_handler import categorize_expense
 from sqlalchemy import select
 from datetime import datetime
