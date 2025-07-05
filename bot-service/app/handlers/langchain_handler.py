@@ -8,7 +8,7 @@ import os
 llm = ChatOpenAI(
     api_key=os.getenv("GROQ_API_KEY"),  
     base_url="https://api.groq.com/openai/v1",  
-    model="MODEL_NAME",  # Replace with your Groq model name
+    model=os.getenv("MODEL_NAME"),  # Replace with your Groq model name
 )
 logger = logging.getLogger(__name__)
 
