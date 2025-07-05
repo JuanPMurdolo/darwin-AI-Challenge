@@ -8,7 +8,7 @@ import os
 llm = ChatOpenAI(
     api_key=os.getenv("GROQ_API_KEY"),  
     base_url="https://api.groq.com/openai/v1",  
-    model="mixtral-8x7b-32768"
+    model="distil-whisper-large-v3-en"
 )
 logger = logging.getLogger(__name__)
 
