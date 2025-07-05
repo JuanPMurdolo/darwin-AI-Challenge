@@ -3,8 +3,13 @@ from langchain_core.messages import HumanMessage
 from app.core.config import OPENAI_API_KEY
 import logging
 import json
+import os
 
-llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY)
+llm = ChatOpenAI(
+    api_key=os.getenv("GROQ_API_KEY"),  
+    base_url="https://api.groq.com/openai/v1",  
+    model="mixtral-8x7b-32768"
+)
 logger = logging.getLogger(__name__)
 
 CATEGORIES = [
@@ -17,7 +22,7 @@ async def categorize_expense(text: str):
 
     prompt = f"""
 You are an expense analyzer. The user wrote: "{text}".
-Extract the category (e.g. Food, Transport), amount (as float), and a short description.
+Extract the category (e.g. Food, Transport), amount (as float), and a short description. Don't use any other words or context that the user might provide. Just expenses.
 Respond in JSON format like this: {{"category": "Food", "amount": 10.5, "description": "Pizza"}}
 """
     try:
