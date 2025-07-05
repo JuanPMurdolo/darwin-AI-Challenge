@@ -37,6 +37,7 @@ class ExpenseBot {
 
     try {
       const response = await this.sendToBotService(telegramId, messageText);
+      logger.info(`Response from bot service: ${JSON.stringify(response)}`);
 
       if (response.success) {
         await this.bot.sendMessage(chatId, response.message);
