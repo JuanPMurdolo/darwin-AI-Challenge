@@ -25,13 +25,12 @@ You are an expense analyzer. The user wrote: "{text}".
 Extract the category (e.g. Food, Transport) from this categories "{CATEGORIES}", amount (as float), and a short description. Don't use any other words or context that the user might provide. Just expenses.
 Respond in JSON format like this: {{"category": "Food", "amount": 10.5, "description": "Pizza"}}
 """
-
     try:
         chat_completion = client.chat.completions.create(
             messages=[
                 {
                     "role": "user",
-                    "content": "{prompt}",
+                    "content": prompt,
                 }
             ],
             model=os.environ.get("MODEL_NAME"),
