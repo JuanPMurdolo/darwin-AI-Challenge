@@ -86,7 +86,11 @@ class ExpenseBot {
   }
 
   async handleError(chatId, error) {
-    logger.error("Error processing message:", error.message)
+    if (error.response) {
+        logger.error("Error processing message:", JSON.stringify(error.response.data, null, 2));
+      } else {
+        logger.error("Error processing message:", error.message);
+    }
 
     switch (error.message) {
       case "USER_NOT_AUTHORIZED":
