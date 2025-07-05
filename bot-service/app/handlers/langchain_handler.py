@@ -2,6 +2,7 @@ from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage
 from app.core.config import OPENAI_API_KEY
 import logging
+import json
 
 llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY)
 logger = logging.getLogger(__name__)
