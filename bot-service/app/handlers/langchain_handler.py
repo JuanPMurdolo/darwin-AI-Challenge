@@ -14,7 +14,7 @@ async def categorize_expense(text: str):
     
     try:
         message = HumanMessage(content=prompt)
-        response = await llm.ainvoke(prompt)
+        response = await llm.ainvoke(message)
         parsed = response.content.strip().split(",")
         print("Categorized:", parsed)
         if len(parsed) != 3:
