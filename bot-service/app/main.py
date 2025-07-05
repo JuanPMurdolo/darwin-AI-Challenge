@@ -13,8 +13,6 @@ app = FastAPI(
 async def startup_event():
     await init_db()
 
-
-
 # Include the expense router
 app.include_router(expense_router)
 app.include_router(health_router)
