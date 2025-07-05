@@ -8,17 +8,25 @@ router = APIRouter(prefix="/expense", tags=["Expense"])
 logger = logging.getLogger(__name__)
 
 @router.post("/add")
-async def add_expense(data: ExpenseInput):
-    logger.info("Parsed data: %s", data.model_dump())
+async def add_expense(request: Request):
+    data = await request.json()
+    logger.info("Parsed raw data: %s", data)
     
+    user_id = data.get("user_id")
+    description = data.get("description")
+    amount = data.get("amount")
+    category = data.get("category")
+    telegram_id = data.get("telegram_id")
+    text = data.get("message") or data.get("text")  # compatibilidad
+
     expense_service = ExpenseService()
     return await expense_service.add_expense(
-        user_id=data.user_id,
-        description=data.description,
-        amount=data.amount,
-        category=data.category,
-        telegram_id=data.telegram_id,
-        text=data.text
+        user_id=user_id,
+        description=description,
+        amount=amount,
+        category=category,
+        telegram_id=telegram_id,
+        text=text
     )
     
 @router.get("/list")
