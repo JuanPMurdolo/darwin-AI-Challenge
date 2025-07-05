@@ -46,7 +46,7 @@ class ExpenseRepository:
                 print("Expense added:", expense)
                 await session.commit()
                 print("Expense committed to DB")
-                return {"message": f"{category} expense added ✅", "status": "success"}
+                return {"message": f"{category} expense added ✅ with amount of {amount}", "status": "success"}
 
         except Exception as e:
             import traceback
