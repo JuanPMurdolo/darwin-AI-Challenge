@@ -19,6 +19,18 @@ CATEGORIES = [
 
 async def categorize_expense(text: str):
     logger.info(f"Text to categorize: {text}")
+    if text is None or text.strip() == "":
+        logger.warning("Empty text provided for categorization.")
+        return "Misc", 0.0, "No description"
+    #If text doesn't contain any numbers, return Misc category
+    if not any(char.isdigit() for char in text):
+        logger.warning("No numbers found in text. Categorizing as Misc.")
+        return "Misc", 0.0, text
+    # Prepare the prompt for LangChain
+    #if the text is too long, truncate it to 50 characters
+    if len(text) > 50:
+        text = text[:50]
+        logger.warning("Text truncated to 50 characters for categorization.")
 
     prompt = f"""
 You are an expense analyzer. The user wrote: "{text}".
