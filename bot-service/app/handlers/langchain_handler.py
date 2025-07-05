@@ -25,6 +25,7 @@ You are an expense analyzer. The user wrote: "{text}".
 Extract the category (e.g. Food, Transport) from this categories "{CATEGORIES}", amount (as float), and a short description. Don't use any other words or context that the user might provide. Just expenses.
 Respond in JSON format like this: {{"category": "Food", "amount": 10.5, "description": "Pizza"}}
 """
+    logger.info(f"LangChain prompt: {prompt}")
     try:
         chat_completion = client.chat.completions.create(
             messages=[
@@ -39,14 +40,14 @@ Respond in JSON format like this: {{"category": "Food", "amount": 10.5, "descrip
 
         parsed = json.loads(chat_completion.choices[0].message.content)
         return parsed["category"], float(parsed["amount"]), parsed["description"]
-
+    
     except Exception as e:
         logger.warning(f"LangChain error: {e}. Using mock categorization.")
 
         # 🧪 Mock categorization fallback
         words = text.lower().split()
         amount = next((float(w) for w in words if w.replace(".", "", 1).isdigit()), 0.0)
-        category = "Food" if "pizza" in words or "burger" in words else "Misc"
+        category = "Misc"
         description = text
 
         return category, amount, description
