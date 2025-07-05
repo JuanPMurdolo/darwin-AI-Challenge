@@ -36,6 +36,8 @@ Respond in JSON format like this: {{"category": "Food", "amount": 10.5, "descrip
             ],
             model=os.environ.get("MODEL_NAME"),
         )
+        logger.info(f"LangChain response: {chat_completion}")
+        
         logger.info(f"LangChain response: {chat_completion.choices[0].message.content}")
 
         parsed = json.loads(chat_completion.choices[0].message.content)
