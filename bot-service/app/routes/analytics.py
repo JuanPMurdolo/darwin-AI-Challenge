@@ -5,7 +5,7 @@ from celery.result import AsyncResult
 
 
 router = APIRouter(prefix="/analytics", tags=["Analytics"])
-logger = logging.getLogger(__name__)
+#logger = logging.getLogger(__name__)
 
 @router.get("/")
 async def get_expense_analytics(request: Request):
