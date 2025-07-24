@@ -1,7 +1,7 @@
 
 
 
-from app.core.db import AsyncSessionLocal, async_session
+from app.core.db import AsyncSessionLocal
 from app.models.user import User
 from app.models.expense import Expense
 from app.handlers.langchain_handler import categorize_expense

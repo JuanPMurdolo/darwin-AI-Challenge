@@ -1,5 +1,4 @@
 from sqlalchemy import func, select
-from app.core.db import async_session
 from app.models.expense import Expense
 from datetime import date
 from app.core.db import AsyncSessionLocal
