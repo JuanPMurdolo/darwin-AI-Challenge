@@ -7,7 +7,7 @@ class AnalyticsService:
     def __init__(self):
         self.repo = AnalyticsRepository()
 
-    async def run_analytics(self, data: AnalyticsRequest):
+    async def get_expense_analytics(self, data: AnalyticsRequest):
         start_date = data.start_date or date.min
         end_date = data.end_date or date.max
 
