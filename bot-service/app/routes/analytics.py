@@ -17,7 +17,7 @@ async def create_analytics_task(request: Request) -> AnalyticsResponse:
     """
     try:
         data = await request.json()
-        logger.info("Creating analytics task", data=data)
+        logger.info(f"Creating analytics task: {data}")
         
         # Validate the request data
         analytics_request = AnalyticsRequest(**data)
@@ -25,7 +25,7 @@ async def create_analytics_task(request: Request) -> AnalyticsResponse:
         # Submit task to Celery
         task = run_analytics_task.delay(analytics_request.model_dump())
         
-        logger.info("Analytics task created", task_id=task.id)
+        logger.info(f"Analytics task created: {task.id}")
         
         return AnalyticsResponse(
             task_id=task.id,
@@ -33,7 +33,7 @@ async def create_analytics_task(request: Request) -> AnalyticsResponse:
         )
         
     except Exception as e:
-        logger.error("Error creating analytics task", error=str(e))
+        logger.error(f"Error creating analytics task: {str(e)}")
         raise HTTPException(status_code=400, detail=f"Error creating task: {str(e)}")
 
 @router.get("/status/{task_id}", response_model=TaskStatusResponse)
@@ -41,7 +41,7 @@ async def get_task_status(task_id: str) -> TaskStatusResponse:
     """
     Get the status of an analytics task
     """
-    logger.info("Checking task status", task_id=task_id)
+    logger.info(f"Checking task status: {task_id}")
     
     try:
         task_result = AsyncResult(task_id, app=celery_app)
@@ -58,7 +58,7 @@ async def get_task_status(task_id: str) -> TaskStatusResponse:
                 result=task_result.result
             )
         elif task_result.state == "FAILURE":
-            logger.error("Task failed", task_id=task_id, error=str(task_result.result))
+            logger.error(f"Task failed: {task_id} - {str(task_result.result)}")
             return TaskStatusResponse(
                 task_id=task_id,
                 status="FAILED",
@@ -71,7 +71,7 @@ async def get_task_status(task_id: str) -> TaskStatusResponse:
             )
             
     except Exception as e:
-        logger.error("Error checking task status", task_id=task_id, error=str(e))
+        logger.error(f"Error checking task status {task_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error checking task status: {str(e)}")
 
 @router.get("/sync", response_model=Dict[str, Any])
@@ -83,7 +83,7 @@ async def get_analytics_sync(
     """
     Get analytics synchronously (for testing purposes)
     """
-    logger.info("Getting analytics synchronously", user_id=user_id, start_date=start_date, end_date=end_date)
+    logger.info(f"Getting analytics synchronously for user {user_id}")
     
     try:
         from datetime import datetime
@@ -101,5 +101,5 @@ async def get_analytics_sync(
         return result.model_dump()
         
     except Exception as e:
-        logger.error("Error in sync analytics", error=str(e))
+        logger.error(f"Error in sync analytics: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error getting analytics: {str(e)}")
