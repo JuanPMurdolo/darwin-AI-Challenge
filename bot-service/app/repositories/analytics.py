@@ -5,7 +5,7 @@ from app.core.db import AsyncSessionLocal
 
 
 class AnalyticsRepository:
-    async def get_expenses_summary(self, user_id: int, start_date: date, end_date: date):
+    async def get_expenses_summary(self, user_id: str, start_date: date, end_date: date):
         async with AsyncSessionLocal() as session:
             query = (
                 select(Expense.category, func.sum(Expense.amount).label("total"))
@@ -19,7 +19,7 @@ class AnalyticsRepository:
             result = await session.execute(query)
             return result.all()
 
-    async def get_total_expenses(self, user_id: int, start_date: date, end_date: date):
+    async def get_total_expenses(self, user_id: str, start_date: date, end_date: date):
         async with AsyncSessionLocal() as session:
             query = (
                 select(func.sum(Expense.amount))
