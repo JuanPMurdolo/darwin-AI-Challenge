@@ -22,12 +22,9 @@ async def categorize_expense(text: str):
     if text is None or text.strip() == "":
         logger.warning("Empty text provided for categorization.")
         return "Misc", 0.0, "No description"
-    #If text doesn't contain any numbers, return Misc category
     if not any(char.isdigit() for char in text):
         logger.warning("No numbers found in text. Categorizing as Misc.")
         return "Misc", 0.0, text
-    # Prepare the prompt for LangChain
-    #if the text is too long, truncate it to 50 characters
     if len(text) > 50:
         text = text[:50]
         logger.warning("Text truncated to 50 characters for categorization.")
@@ -58,7 +55,6 @@ Respond in JSON format like this: {{"category": "Food", "amount": 10.5, "descrip
     except Exception as e:
         logger.warning(f"LangChain error: {e}. Using mock categorization.")
 
-        # 🧪 Mock categorization fallback
         words = text.lower().split()
         amount = next((float(w) for w in words if w.replace(".", "", 1).isdigit()), 0.0)
         category = "Misc"

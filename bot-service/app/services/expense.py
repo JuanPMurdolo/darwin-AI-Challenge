@@ -18,3 +18,6 @@ class ExpenseService:
     
     async def update_expense(self, expense_id: int, description: str, amount: float, category: str):
         return await self.expense_repo.update_expense(expense_id, description, amount, category)
+    
+    async def get_expense_analytics(self, user_id: int, start_date: str, end_date: str):
+        return await self.expense_repo.get_expense_analytics(user_id, start_date, end_date)

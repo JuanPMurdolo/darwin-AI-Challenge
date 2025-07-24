@@ -56,3 +56,13 @@ async def update_expense(request: Request, expense_id: int):
 
     expense_service = ExpenseService()
     return await expense_service.update_expense(expense_id, description, amount, category)
+
+@router.get("/analytics")
+async def get_expense_analytics(request: Request):
+    data = await request.json()
+    user_id = data.get("user_id")
+    start_date = data.get("start_date")
+    end_date = data.get("end_date")
+
+    expense_service = ExpenseService()
+    return await expense_service.get_expense_analytics(user_id, start_date, end_date)

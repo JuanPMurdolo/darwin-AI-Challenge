@@ -104,3 +104,32 @@ class ExpenseRepository:
             await session.commit()
             return {"message": "Expense updated successfully"}
         
+    async def get_expense_analytics(self, user_id: int, start_date: str, end_date: str):
+        async with AsyncSessionLocal() as session:
+            result = await session.execute(select(User).where(User.id == user_id))
+            user = result.scalar_one_or_none()
+
+            if not user:
+                return {"message": "Unauthorized"}
+
+            query = select(Expense).where(
+                Expense.user_id == user.id,
+                Expense.added_at >= start_date,
+                Expense.added_at <= end_date
+            )
+            expenses = await session.execute(query)
+            total_expenses = expenses.scalars().all()
+            total_amount = sum(expense.amount for expense in total_expenses)
+            media_amount_per_category = total_amount / len(set(expense.category for expense in total_expenses)) if total_expenses else 0
+            variation_percentage = 0
+            if len(total_expenses) > 1:
+                first_month_expense = total_expenses[0].amount
+                last_month_expense = total_expenses[-1].amount
+                if first_month_expense != 0:
+                    variation_percentage = ((last_month_expense - first_month_expense) / first_month_expense) * 100
+            
+            return {
+                "total_amount": total_amount,
+                "media_amount_per_category": media_amount_per_category,
+                "variation_percentage": variation_percentage
+            }

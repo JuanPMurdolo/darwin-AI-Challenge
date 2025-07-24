@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # 🗄️ PostgreSQL Database
   postgres:
     image: postgres:15
     container_name: expenses-db
@@ -18,29 +19,106 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - expenses-network
+    restart: unless-stopped
 
+  # 🤖 Bot Service (FastAPI Backend)
   bot-service:
-    build: ./bot-service
+    build: 
+      context: ./app
+      dockerfile: ../Dockerfile
     container_name: bot-service
     depends_on:
       postgres:
         condition: service_healthy
-    env_file:
-      - ./bot-service/.env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://expenses_user:expenses_pass@postgres:5432/expenses_db
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     ports:
       - "8000:8000"
-    restart: always
+    volumes:
+      - ./app:/app
+    networks:
+      - expenses-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
+  # 🔗 Connector Service
   connector-service:
     build: ./connector-service
     container_name: connector-service
     depends_on:
-      - bot-service
+      bot-service:
+        condition: service_healthy
     env_file:
       - ./connector-service/.env
     ports:
       - "3000:3000"
-    restart: always
+    networks:
+      - expenses-network
+    restart: unless-stopped
+
+  # 🎨 Frontend Dashboard (Next.js)
+  frontend-dashboard:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: frontend-dashboard
+    depends_on:
+      bot-service:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://bot-service:8000
+      - NEXT_PUBLIC_APP_URL=http://localhost:4000
+    ports:
+      - "4000:3000"
+    networks:
+      - expenses-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health", "||", "exit", "1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # 🔄 Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: expenses-nginx
+    depends_on:
+      - frontend-dashboard
+      - bot-service
+      - connector-service
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - expenses-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health", "||", "exit", "1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
   postgres_data:
+    driver: local
+
+networks:
+  expenses-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
