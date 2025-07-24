@@ -1,8 +1,7 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
 from app.services.analytics import AnalyticsService
 from app.schemas.analytics import AnalyticsRequest, AnalyticsResponse
 from celery.result import AsyncResult
-from app.tasks.analytics import run_analytics
 
 
 router = APIRouter(prefix="/analytics", tags=["Analytics"])
@@ -15,8 +14,8 @@ async def get_expense_analytics(request: Request):
     start_date = data.get("start_date")
     end_date = data.get("end_date")
 
-    expense_service = ExpenseService()
-    return await expense_service.get_expense_analytics(user_id, start_date, end_date)
+    analytics_service = AnalyticsService()
+    return await analytics_service.get_expense_analytics(user_id, start_date, end_date)
 
 @router.get("/status/{task_id}", response_model=AnalyticsResponse)
 async def get_analytics_status(task_id: str):
