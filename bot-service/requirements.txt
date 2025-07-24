@@ -12,3 +12,8 @@ sqlalchemy-utils
 passlib
 groq
 celery[redis]
+redis
+pytest
+pytest-asyncio
+httpx
+structlog
