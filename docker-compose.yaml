@@ -11,7 +11,7 @@ services:
       POSTGRES_DB: expenses_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5432:5432"
     healthcheck:
@@ -23,22 +23,48 @@ services:
       - expenses-network
     restart: unless-stopped
 
+  # 🔴 Redis for Celery
+  redis:
+    image: redis:7-alpine
+    container_name: expenses-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - expenses-network
+    restart: unless-stopped
+
   # 🤖 Bot Service (FastAPI Backend)
   bot-service:
     build: 
-      context: ./app
-      dockerfile: ../Dockerfile
+      context: ./bot-service
+      dockerfile: Dockerfile
     container_name: bot-service
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       - DATABASE_URL=postgresql+asyncpg://expenses_user:expenses_pass@postgres:5432/expenses_db
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - MODEL_NAME=${MODEL_NAME:-llama3-8b-8192}
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - REDIS_URL=redis://redis:6379/0
+      - LOG_LEVEL=INFO
+      - ENVIRONMENT=production
     ports:
       - "8000:8000"
     volumes:
-      - ./app:/app
+      - ./bot-service:/app
     networks:
       - expenses-network
     restart: unless-stopped
@@ -49,6 +75,58 @@ services:
       retries: 3
       start_period: 40s
 
+  # 🔄 Celery Worker
+  celery-worker:
+    build:
+      context: ./bot-service
+      dockerfile: celery.dockerfile
+    container_name: celery-worker
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://expenses_user:expenses_pass@postgres:5432/expenses_db
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - MODEL_NAME=${MODEL_NAME:-llama3-8b-8192}
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - REDIS_URL=redis://redis:6379/0
+      - LOG_LEVEL=INFO
+      - ENVIRONMENT=production
+    volumes:
+      - ./bot-service:/app
+    networks:
+      - expenses-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "celery", "-A", "app.core.celery_worker", "inspect", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # 📊 Celery Flower (Optional - for monitoring)
+  celery-flower:
+    build:
+      context: ./bot-service
+      dockerfile: Dockerfile
+    container_name: celery-flower
+    command: celery -A app.core.celery_worker flower --port=5555
+    depends_on:
+      - redis
+      - celery-worker
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    ports:
+      - "5555:5555"
+    networks:
+      - expenses-network
+    restart: unless-stopped
+
   # 🔗 Connector Service
   connector-service:
     build: ./connector-service
@@ -58,6 +136,8 @@ services:
         condition: service_healthy
     env_file:
       - ./connector-service/.env
+    environment:
+      - BOT_SERVICE_URL=http://bot-service:8000
     ports:
       - "3000:3000"
     networks:
@@ -67,7 +147,7 @@ services:
   # 🎨 Frontend Dashboard (Next.js)
   frontend-dashboard:
     build: 
-      context: .
+      context: ./frontend-bot-service
       dockerfile: Dockerfile
     container_name: frontend-dashboard
     depends_on:
@@ -98,8 +178,7 @@ services:
       - bot-service
       - connector-service
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./frontend-bot-service/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     ports:
       - "80:80"
       - "443:443"
@@ -114,6 +193,8 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  redis_data:
     driver: local
 
 networks:
