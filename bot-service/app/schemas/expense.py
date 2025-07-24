@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 from typing import Optional
 
 class ExpenseInput(BaseModel):
-    user_id: int = Field(..., description="ID interno del usuario (opcional si usás solo telegram_id)")
+    user_id: str = Field(..., description="ID interno del usuario (opcional si usás solo telegram_id)")
     description: str = Field(..., description="Descripción de la compra")
     amount: float = Field(..., description="Monto del gasto")
     category: Optional[str] = Field(None, description="Categoría del gasto, si ya viene definida")

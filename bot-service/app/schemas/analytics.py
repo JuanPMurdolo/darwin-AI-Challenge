@@ -4,7 +4,7 @@ from datetime import date
 
 
 class AnalyticsRequest(BaseModel):
-    user_id: int = Field(..., description="ID del usuario a analizar")
+    user_id: str = Field(..., description="ID del usuario a analizar")
     start_date: Optional[date] = Field(None, description="Fecha de inicio del análisis")
     end_date: Optional[date] = Field(None, description="Fecha de fin del análisis")
 
