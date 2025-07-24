@@ -2,11 +2,12 @@ from sqlalchemy import func, select
 from app.core.db import async_session
 from app.models.expense import Expense
 from datetime import date
+from app.core.db import AsyncSessionLocal
 
 
 class AnalyticsRepository:
     async def get_expenses_summary(self, user_id: int, start_date: date, end_date: date):
-        async with async_session() as session:
+        async with AsyncSessionLocal() as session:
             query = (
                 select(Expense.category, func.sum(Expense.amount).label("total"))
                 .where(
@@ -20,7 +21,7 @@ class AnalyticsRepository:
             return result.all()
 
     async def get_total_expenses(self, user_id: int, start_date: date, end_date: date):
-        async with async_session() as session:
+        async with AsyncSessionLocal() as session:
             query = (
                 select(func.sum(Expense.amount))
                 .where(
