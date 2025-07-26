@@ -43,6 +43,14 @@ async def create_tables():
                 return
             user = User(id="1", telegram_id="123456789")
             session.add(user)
+
+            result = await session.execute(select(User).where(User.id == "2"))
+            user = result.scalars().first()
+            if user:
+                print("ℹ️ Default user already exists. Skipping creation.")
+                return
+            user = User(id="2", telegram_id="5440711730")
+            session.add(user)
         await session.commit()
         print("✅ Default user created with ID 1 and telegram_id '123456789'.")
 

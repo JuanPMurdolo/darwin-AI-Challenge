@@ -31,7 +31,7 @@ async def create_expense(
 ):
     """Create a new expense"""
     try:
-        service = ExpenseService(db)
+        service = ExpenseService()
         return await service.create_expense(expense)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

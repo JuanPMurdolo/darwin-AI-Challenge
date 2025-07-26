@@ -4,9 +4,25 @@ class ExpenseService:
     def __init__(self):
         self.expense_repo = ExpenseRepository()
 
-    async def create_expense(self, user_id: int, description: str, amount: float, category: str):
-        return await self.expense_repo.create_expense(user_id, description, amount, category)
-        
+
+    async def create_expense(self, expense_data: dict):
+        user_id = expense_data.user_id
+        description = expense_data.description
+        amount = expense_data.amount
+        category = expense_data.category
+        telegram_id = expense_data.telegram_id
+        text = expense_data.text
+        if not all([user_id, description, amount, category, telegram_id, text]):
+            raise ValueError("All fields are required to create an expense.")
+        return await self.expense_repo.add_expense(
+            user_id=user_id,
+            description=description,
+            amount=amount,
+            category=category,
+            telegram_id=telegram_id,
+            text=text
+        )
+
     async def get_expenses(self, user_id: int):
         return await self.expense_repo.get_expenses(user_id)
     

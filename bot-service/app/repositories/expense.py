@@ -1,6 +1,3 @@
-
-
-
 from app.core.db import AsyncSessionLocal
 from app.models.user import User
 from app.models.expense import Expense
@@ -21,16 +18,12 @@ class ExpenseRepository:
 
                 if not user:
                     print("❌ User not found")
-                    return {"message": "Unauthorized"}
+                    return None
                 print("User found:", user)
-                
-                # Check if the user exists
-                # if not user:
                 print("Text to categorize", text)
                 parsed = await categorize_expense(text)
                 if not parsed or len(parsed) != 3:
-                    return {"message": "Not an expense"}
-                
+                    return None
                 print("Parsed expense:", parsed)
                 category, amount, description = parsed
 
@@ -46,12 +39,15 @@ class ExpenseRepository:
                 print("Expense added:", expense)
                 await session.commit()
                 print("Expense committed to DB")
-                return {"message": f"{category} expense added ✅ with amount of {amount}", "status": "success"}
+                await session.refresh(expense)
+                # Attach telegram_id for response serialization
+                expense.telegram_id = user.telegram_id
+                return expense
 
         except Exception as e:
             import traceback
             traceback.print_exc()
-            return {"message": f"Error adding expense: {str(e)}"}
+            return None
         
     async def get_expenses(self, user_id: int):
         async with AsyncSessionLocal() as session:

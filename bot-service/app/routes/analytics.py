@@ -11,27 +11,19 @@ router = APIRouter(prefix="/analytics", tags=["Analytics"])
 logger = get_logger(__name__)
 
 @router.post("/", response_model=AnalyticsResponse)
-async def create_analytics_task(request: Request) -> AnalyticsResponse:
+async def create_analytics_task(analytic: AnalyticsRequest) -> AnalyticsResponse:
     """
     Create an asynchronous analytics task
     """
     try:
-        data = await request.json()
-        logger.info("Creating analytics task", data=data)
-        
-        # Validate the request data
-        analytics_request = AnalyticsRequest(**data)
-        
+        logger.info("Creating analytics task", data=analytic.model_dump())
         # Submit task to Celery
-        task = run_analytics_task.delay(analytics_request.model_dump())
-        
+        task = run_analytics_task.delay(analytic.model_dump())
         logger.info("Analytics task created", task_id=task.id)
-        
         return AnalyticsResponse(
             task_id=task.id,
             status="PENDING"
         )
-        
     except Exception as e:
         logger.error("Error creating analytics task", error=str(e))
         raise HTTPException(status_code=400, detail=f"Error creating task: {str(e)}")
