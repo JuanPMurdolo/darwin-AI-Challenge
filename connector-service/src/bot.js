@@ -70,16 +70,17 @@ class ExpenseBot {
       body: JSON.stringify(payload)
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      const detail = errorData.detail || "Unknown error";
-
-      if (response.status === 403) throw new Error("USER_NOT_AUTHORIZED");
-      if (response.status === 400) throw new Error("NOT_AN_EXPENSE");
-      throw new Error(`BOT_SERVICE_ERROR: ${detail}`);
+    // Accept any 2xx response as success
+    if (response.ok) {
+      const data = await response.json();
+      return { status: "success", message: `Expense added: ${data.description} $${data.amount}` };
     }
+    const errorData = await response.json().catch(() => ({}));
+    const detail = errorData.detail || "Unknown error";
 
-    return await response.json();
+    if (response.status === 403) throw new Error("USER_NOT_AUTHORIZED");
+    if (response.status === 400) throw new Error("NOT_AN_EXPENSE");
+    throw new Error(`BOT_SERVICE_ERROR: ${detail}`);
   }
 
   async handleError(chatId, error) {
