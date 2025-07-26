@@ -17,7 +17,7 @@ async def get_expenses(
 ):
     """Get all expenses with pagination"""
     try:
-        service = ExpenseService(db)
+        service = ExpenseService()
         expenses = await service.get_expenses(skip=skip, limit=limit)
         return expenses
     except Exception as e:
@@ -44,7 +44,7 @@ async def get_expense(
 ):
     """Get a specific expense by ID"""
     try:
-        service = ExpenseService(db)
+        service = ExpenseService()
         expense = await service.get_expense(expense_id)
         if not expense:
             raise HTTPException(status_code=404, detail="Expense not found")
@@ -63,7 +63,7 @@ async def update_expense(
 ):
     """Update an existing expense"""
     try:
-        service = ExpenseService(db)
+        service = ExpenseService()
         expense = await service.update_expense(expense_id, expense_update)
         if not expense:
             raise HTTPException(status_code=404, detail="Expense not found")
@@ -81,7 +81,7 @@ async def delete_expense(
 ):
     """Delete an expense"""
     try:
-        service = ExpenseService(db)
+        service = ExpenseService()
         success = await service.delete_expense(expense_id)
         if not success:
             raise HTTPException(status_code=404, detail="Expense not found")
