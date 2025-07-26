@@ -68,3 +68,12 @@ async def async_session():
     async with AsyncSessionLocal() as session:
         yield session
 
+def get_new_async_session():
+    engine = create_async_engine(DATABASE_URL, echo=False)
+    AsyncSessionLocal = sessionmaker(
+        bind=engine,
+        class_=AsyncSession,
+        expire_on_commit=False
+    )
+    return AsyncSessionLocal
+

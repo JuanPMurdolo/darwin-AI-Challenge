@@ -1,7 +1,7 @@
 from sqlalchemy import func, select, extract
 from app.models.expense import Expense
 from datetime import date, datetime
-from app.core.db import AsyncSessionLocal
+from app.core.db import get_new_async_session
 from app.core.logging import get_logger
 from typing import List, Tuple, Optional
 from decimal import Decimal
@@ -14,6 +14,7 @@ class AnalyticsRepository:
         logger.info("Getting expenses summary", user_id=user_id, start_date=start_date, end_date=end_date)
         
         try:
+            AsyncSessionLocal = get_new_async_session()
             async with AsyncSessionLocal() as session:
                 query = (
                     select(Expense.category, func.sum(Expense.amount).label("total"))
@@ -39,6 +40,7 @@ class AnalyticsRepository:
         logger.info("Getting total expenses", user_id=user_id, start_date=start_date, end_date=end_date)
         
         try:
+            AsyncSessionLocal = get_new_async_session()
             async with AsyncSessionLocal() as session:
                 query = (
                     select(func.sum(Expense.amount))
