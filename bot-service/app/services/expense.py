@@ -23,8 +23,9 @@ class ExpenseService:
             text=text
         )
 
-    async def get_expenses(self, user_id: int):
-        return await self.expense_repo.get_expenses(user_id)
+    async def get_expenses(self, user_id: int, skip: int = 0, limit: int = 10):
+        return await self.expense_repo.get_expenses(user_id=user_id, skip=skip, limit=limit)
+        
     
     async def get_expense_by_id(self, expense_id: int):
         return await self.expense_repo.get_expense_by_id(expense_id)

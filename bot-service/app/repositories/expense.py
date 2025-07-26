@@ -52,7 +52,7 @@ class ExpenseRepository:
             traceback.print_exc()
             return None
         
-    async def get_expenses(self, user_id: int):
+    async def get_expenses(self, user_id: int, skip: int = 0, limit: int = 10):
         async with AsyncSessionLocal() as session:
             result = await session.execute(select(User).where(User.id == user_id))
             user = result.scalar_one_or_none()
@@ -60,7 +60,8 @@ class ExpenseRepository:
             if not user:
                 return {"message": "Unauthorized"}
 
-            expenses = await session.execute(select(Expense).where(Expense.user_id == user.id))
+            query = select(Expense).where(Expense.user_id == user.id).offset(skip).limit(limit)
+            expenses = await session.execute(query)
             return expenses.scalars().all()
         
     async def get_expense_by_id(self, expense_id: int):
