@@ -1,4 +1,6 @@
 from app.repositories.expense import ExpenseRepository
+from app.models.user import User
+from app.core.db import AsyncSessionLocal
 
 class ExpenseService:
     def __init__(self):
@@ -24,8 +26,14 @@ class ExpenseService:
         )
 
     async def get_expenses(self, skip: int = 0, limit: int = 10):
-        return await self.expense_repo.get_all_expenses(skip=skip, limit=limit)
-        
+        expenses = await self.expense_repo.get_all_expenses(skip=skip, limit=limit)
+        # Attach telegram_id to each expense
+        async with AsyncSessionLocal() as session:
+            for expense in expenses:
+                result = await session.execute(select(User).where(User.id == expense.user_id))
+                user = result.scalar_one_or_none()
+                expense.telegram_id = user.telegram_id if user else None
+        return expenses
     
     async def get_expense_by_id(self, expense_id: int):
         return await self.expense_repo.get_expense_by_id(expense_id)
