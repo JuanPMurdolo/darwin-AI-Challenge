@@ -7,7 +7,7 @@ from app.core.logging import get_logger
 from celery.result import AsyncResult
 from typing import Dict, Any
 
-router = APIRouter(prefix="/", tags=["Analytics"])
+router = APIRouter()
 logger = get_logger(__name__)
 
 @router.post("/", response_model=AnalyticsResponse)
