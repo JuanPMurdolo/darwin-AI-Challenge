@@ -63,6 +63,12 @@ class ExpenseRepository:
             query = select(Expense).where(Expense.user_id == user.id).offset(skip).limit(limit)
             expenses = await session.execute(query)
             return expenses.scalars().all()
+
+    async def get_all_expenses(self, skip= 0, limit=100):
+        async with AsyncSessionLocal() as session:
+            query = select(Expense).offset(skip).limit(limit)
+            expenses = await session.execute(query)
+            return expenses.scalars().all()
         
     async def get_expense_by_id(self, expense_id: int):
         async with AsyncSessionLocal() as session:
