@@ -1,6 +1,7 @@
 from app.repositories.expense import ExpenseRepository
 from app.models.user import User
 from app.core.db import AsyncSessionLocal
+from sqlalchemy import select
 
 class ExpenseService:
     def __init__(self):
