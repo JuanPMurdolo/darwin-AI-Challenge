@@ -1,19 +1,12 @@
 "use client"
 
+import { api } from "@/lib/api"
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 import { TrendingUp, TrendingDown, DollarSign, CreditCard, Target, Activity } from "lucide-react"
-import { apiClient } from "@/lib/api"
-
-interface ExpenseOverview {
-  total_expenses: number
-  total_amount: number
-  average_amount: number
-  expense_count: number
-}
 
 export function ExpenseOverview() {
-  const [overview, setOverview] = useState<ExpenseOverview | null>(null)
+  const [overview, setOverview] = useState<any | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -21,8 +14,7 @@ export function ExpenseOverview() {
     const fetchOverview = async () => {
       try {
         setLoading(true)
-        // Using mock user ID - in real app, get from auth context
-        const data = await apiClient.getExpenseOverview(1)
+        const data = await api.getExpenseOverview(1)
         setOverview(data)
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch overview")
@@ -30,7 +22,6 @@ export function ExpenseOverview() {
         setLoading(false)
       }
     }
-
     fetchOverview()
   }, [])
 
