@@ -1,110 +1,133 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
-import { TrendingUp, TrendingDown, Calendar, Wallet, CreditCard, Receipt } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
+import { TrendingUp, TrendingDown, DollarSign, CreditCard, Target, Activity } from "lucide-react"
+import { apiClient } from "@/lib/api"
 
-interface ExpenseStats {
-  totalExpenses: number
-  monthlyExpenses: number
-  averageExpense: number
-  expenseCount: number
+interface ExpenseOverview {
+  total_expenses: number
+  total_amount: number
+  average_amount: number
+  expense_count: number
 }
 
 export function ExpenseOverview() {
-  const [stats, setStats] = useState<ExpenseStats>({
-    totalExpenses: 0,
-    monthlyExpenses: 0,
-    averageExpense: 0,
-    expenseCount: 0,
-  })
+  const [overview, setOverview] = useState<ExpenseOverview | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Mock data - replace with actual API call
-    setStats({
-      totalExpenses: 2847.5,
-      monthlyExpenses: 1234.75,
-      averageExpense: 89.32,
-      expenseCount: 32,
-    })
+    const fetchOverview = async () => {
+      try {
+        setLoading(true)
+        // Using mock user ID - in real app, get from auth context
+        const data = await apiClient.getExpenseOverview(1)
+        setOverview(data)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to fetch overview")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchOverview()
   }, [])
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Card key={i} className="bg-gradient-to-br from-gray-100 to-gray-200 animate-pulse">
+            <CardHeader className="pb-2">
+              <div className="h-4 w-24 bg-gray-300 rounded"></div>
+            </CardHeader>
+            <CardContent>
+              <div className="h-8 w-20 bg-gray-300 rounded mb-2"></div>
+              <div className="h-3 w-16 bg-gray-300 rounded"></div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <Card className="bg-red-50 border-red-200">
+        <CardContent className="p-6">
+          <p className="text-red-600">Error loading overview: {error}</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!overview) return null
 
   const cards = [
     {
       title: "Total Expenses",
-      value: `$${stats.totalExpenses.toFixed(2)}`,
-      icon: Wallet,
+      value: `$${overview.total_amount.toFixed(2)}`,
       change: "+12.5%",
-      changeType: "increase" as const,
-      gradient: "from-purple-500 to-pink-500",
-      bgColor: "bg-gradient-to-br from-purple-50 to-pink-50",
-      iconBg: "bg-gradient-to-br from-purple-500 to-pink-500",
+      trend: "up" as const,
+      icon: DollarSign,
+      gradient: "from-emerald-500 to-teal-600",
     },
     {
-      title: "This Month",
-      value: `$${stats.monthlyExpenses.toFixed(2)}`,
-      icon: Calendar,
-      change: "+8.2%",
-      changeType: "increase" as const,
-      gradient: "from-blue-500 to-cyan-500",
-      bgColor: "bg-gradient-to-br from-blue-50 to-cyan-50",
-      iconBg: "bg-gradient-to-br from-blue-500 to-cyan-500",
-    },
-    {
-      title: "Average Expense",
-      value: `$${stats.averageExpense.toFixed(2)}`,
+      title: "Expense Count",
+      value: overview.expense_count.toString(),
+      change: "+3 this week",
+      trend: "up" as const,
       icon: CreditCard,
-      change: "-2.1%",
-      changeType: "decrease" as const,
-      gradient: "from-emerald-500 to-teal-500",
-      bgColor: "bg-gradient-to-br from-emerald-50 to-teal-50",
-      iconBg: "bg-gradient-to-br from-emerald-500 to-teal-500",
+      gradient: "from-blue-500 to-indigo-600",
     },
     {
-      title: "Total Transactions",
-      value: stats.expenseCount.toString(),
-      icon: Receipt,
-      change: "+15.3%",
-      changeType: "increase" as const,
-      gradient: "from-orange-500 to-red-500",
-      bgColor: "bg-gradient-to-br from-orange-50 to-red-50",
-      iconBg: "bg-gradient-to-br from-orange-500 to-red-500",
+      title: "Average Amount",
+      value: `$${overview.average_amount.toFixed(2)}`,
+      change: "-2.1%",
+      trend: "down" as const,
+      icon: Target,
+      gradient: "from-purple-500 to-pink-600",
+    },
+    {
+      title: "Monthly Budget",
+      value: "$2,500",
+      change: `${((overview.total_amount / 2500) * 100).toFixed(1)}% used`,
+      trend: overview.total_amount > 2000 ? "down" : ("up" as const),
+      icon: Activity,
+      gradient: "from-orange-500 to-red-600",
     },
   ]
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {cards.map((card, index) => (
-        <Card
-          key={index}
-          className={`${card.bgColor} border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105`}
-        >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-semibold text-gray-700">{card.title}</CardTitle>
-            <div className={`p-2 rounded-lg ${card.iconBg} shadow-lg`}>
-              <card.icon className="h-5 w-5 text-white" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-gray-900 mb-2">{card.value}</div>
-            <div className="flex items-center justify-between">
-              <p
-                className={`text-sm font-medium flex items-center ${
-                  card.changeType === "increase" ? "text-green-600" : "text-red-600"
-                }`}
-              >
-                {card.changeType === "increase" ? (
-                  <TrendingUp className="h-4 w-4 mr-1" />
-                ) : (
-                  <TrendingDown className="h-4 w-4 mr-1" />
-                )}
+      {cards.map((card, index) => {
+        const Icon = card.icon
+        const TrendIcon = card.trend === "up" ? TrendingUp : TrendingDown
+
+        return (
+          <Card
+            key={index}
+            className="bg-gradient-to-br from-white to-gray-50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+          >
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-gray-600 flex items-center justify-between">
+                {card.title}
+                <div className={`bg-gradient-to-r ${card.gradient} p-2 rounded-lg`}>
+                  <Icon className="h-4 w-4 text-white" />
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-gray-900 mb-1">{card.value}</div>
+              <div className={`text-xs flex items-center ${card.trend === "up" ? "text-green-600" : "text-red-600"}`}>
+                <TrendIcon className="h-3 w-3 mr-1" />
                 {card.change}
-              </p>
-              <span className="text-xs text-gray-500">vs last month</span>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+              </div>
+            </CardContent>
+          </Card>
+        )
+      })}
     </div>
   )
 }

@@ -1,68 +1,92 @@
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List
 
+from app.core.db import get_db
 from app.services.expense import ExpenseService
-from fastapi import APIRouter, Request
-import logging
-from app.schemas.expense import ExpenseInput
+from app.schemas.expense import ExpenseCreate, ExpenseUpdate, ExpenseResponse
 
-router = APIRouter(prefix="/expense", tags=["Expense"])
-logger = logging.getLogger(__name__)
+router = APIRouter()
 
-@router.post("/add")
-async def add_expense(request: Request):
-    data = await request.json()
-    logger.info("Parsed raw data: %s", data)
-    
-    user_id = data.get("user_id")
-    description = data.get("description")
-    amount = data.get("amount")
-    category = data.get("category")
-    telegram_id = data.get("telegram_id")
-    text = data.get("message") or data.get("text")  # compatibilidad
 
-    expense_service = ExpenseService()
-    return await expense_service.add_expense(
-        user_id=user_id,
-        description=description,
-        amount=amount,
-        category=category,
-        telegram_id=telegram_id,
-        text=text
-    )
-    
-@router.get("/list")
-async def get_expenses(request: Request):
-    data = await request.json()
-    user_id = data.get("user_id")
+@router.get("/", response_model=List[ExpenseResponse])
+async def get_expenses(
+    skip: int = 0,
+    limit: int = 100,
+    db: AsyncSession = Depends(get_db)
+):
+    """Get all expenses with pagination"""
+    try:
+        service = ExpenseService(db)
+        expenses = await service.get_expenses(skip=skip, limit=limit)
+        return expenses
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
-    expense_service = ExpenseService()
-    return await expense_service.get_expenses(user_id)
 
-@router.get("/{expense_id}")
-async def get_expense_by_id(request: Request, expense_id: int):
-    expense_service = ExpenseService()
-    return await expense_service.get_expense_by_id(expense_id)
+@router.post("/", response_model=ExpenseResponse)
+async def create_expense(
+    expense: ExpenseCreate,
+    db: AsyncSession = Depends(get_db)
+):
+    """Create a new expense"""
+    try:
+        service = ExpenseService(db)
+        return await service.create_expense(expense)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/{expense_id}", response_model=ExpenseResponse)
+async def get_expense(
+    expense_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    """Get a specific expense by ID"""
+    try:
+        service = ExpenseService(db)
+        expense = await service.get_expense(expense_id)
+        if not expense:
+            raise HTTPException(status_code=404, detail="Expense not found")
+        return expense
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/{expense_id}", response_model=ExpenseResponse)
+async def update_expense(
+    expense_id: int,
+    expense_update: ExpenseUpdate,
+    db: AsyncSession = Depends(get_db)
+):
+    """Update an existing expense"""
+    try:
+        service = ExpenseService(db)
+        expense = await service.update_expense(expense_id, expense_update)
+        if not expense:
+            raise HTTPException(status_code=404, detail="Expense not found")
+        return expense
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.delete("/{expense_id}")
-async def delete_expense(request: Request, expense_id: int):
-    expense_service = ExpenseService()
-    return await expense_service.delete_expense(expense_id)
-
-@router.put("/{expense_id}")
-async def update_expense(request: Request, expense_id: int):
-    data = await request.json()
-    description = data.get("description")
-    amount = data.get("amount")
-    category = data.get("category")
-
-    expense_service = ExpenseService()
-    return await expense_service.update_expense(expense_id, description, amount, category)
-
-@router.get("/analytics")
-async def get_expense_analytics(request: Request):
-    data = await request.json()
-    user_id = data.get("user_id")
-    start_date = data.get("start_date")
-    end_date = data.get("end_date")
-
-    expense_service = ExpenseService()
-    return await expense_service.get_expense_analytics(user_id, start_date, end_date)
+async def delete_expense(
+    expense_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    """Delete an expense"""
+    try:
+        service = ExpenseService(db)
+        success = await service.delete_expense(expense_id)
+        if not success:
+            raise HTTPException(status_code=404, detail="Expense not found")
+        return {"message": "Expense deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

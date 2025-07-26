@@ -27,6 +27,30 @@ AsyncSessionLocal = sessionmaker(
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+async def create_tables():
+    """Create database tables if they do not exist."""
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+        print("✅ Database tables created successfully.")
+    
+    async with AsyncSessionLocal() as session:
+        async with session.begin():
+            # Check if the default user already exists
+            result = await session.execute(select(User).where(User.id == "1"))
+            user = result.scalars().first()
+            if user:
+                print("ℹ️ Default user already exists. Skipping creation.")
+                return
+            user = User(id="1", telegram_id="123456789")
+            session.add(user)
+        await session.commit()
+        print("✅ Default user created with ID 1 and telegram_id '123456789'.")
+
+async def get_db():
+    """Dependency to get the database session."""
+    async with AsyncSessionLocal() as session:
+        yield session
+
 async def init_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
@@ -35,5 +59,4 @@ async def init_db():
 async def async_session():
     async with AsyncSessionLocal() as session:
         yield session
-        
-        
+

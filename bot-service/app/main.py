@@ -1,42 +1,56 @@
 from fastapi import FastAPI
-from app.routes.expense import router as expense_router
-from app.routes.health import router as health_router
-from app.routes.analytics import router as analytics_router
-from app.core.db import init_db
-from app.core.logging import configure_logging, get_logger
-from app.core.config import LOG_LEVEL, ENVIRONMENT
-import uvicorn
+from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+import asyncio
+from sqlalchemy import text
 
-# Configure logging
-configure_logging(LOG_LEVEL)
-logger = get_logger(__name__)
+from app.core.db import engine
+from app.routes import expense, analytics, health
+from app.models.base import Base
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+    # Shutdown
+    await engine.dispose()
+
 
 app = FastAPI(
-    title="Darwin AI Bot Service",
-    description="API for managing expenses in the Darwin AI Bot Service",
+    title="Darwin AI Expense Tracker",
+    description="AI-powered expense tracking system",
     version="1.0.0",
+    lifespan=lifespan
 )
 
-@app.on_event("startup")
-async def startup_event():
-    logger.info("Starting Darwin AI Bot Service", environment=ENVIRONMENT)
-    await init_db()
-    logger.info("Database initialized successfully")
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    logger.info("Shutting down Darwin AI Bot Service")
+# CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://frontend:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Include routers
-app.include_router(expense_router)
-app.include_router(health_router)
-app.include_router(analytics_router)
+app.include_router(health.router, prefix="/health", tags=["health"])
+app.include_router(expense.router, prefix="/api/expenses", tags=["expenses"])
+app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"])
 
-if __name__ == "__main__":
-    uvicorn.run(
-        "app.main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=ENVIRONMENT == "development",
-        log_level=LOG_LEVEL.lower()
-    )
+
+@app.get("/")
+async def root():
+    return {"message": "Darwin AI Expense Tracker API", "status": "running"}
+
+
+@app.get("/health")
+async def health_check():
+    try:
+        async with engine.begin() as conn:
+            await conn.execute(text("SELECT 1"))
+        return {"status": "healthy", "database": "connected"}
+    except Exception as e:
+        return {"status": "unhealthy", "error": str(e)}

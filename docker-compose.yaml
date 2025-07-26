@@ -1,133 +1,113 @@
 services:
-  # 🗄️ PostgreSQL Database
   postgres:
     image: postgres:15
-    container_name: expenses-db
     environment:
-      POSTGRES_USER: expenses_user
-      POSTGRES_PASSWORD: expenses_pass
       POSTGRES_DB: expenses_db
+      POSTGRES_USER: expenses_user
+      POSTGRES_PASSWORD: expenses_password
+    ports:
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "5432:5432"
+      - ./scripts:/docker-entrypoint-initdb.d/scripts
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "expenses_user"]
+      test: ["CMD-SHELL", "pg_isready -U expenses_user -d expenses_db"]
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - expenses-network
-    restart: unless-stopped
 
-  # 🔴 Redis for Celery
   redis:
     image: redis:7-alpine
-    container_name: expenses-redis
     ports:
       - "6379:6379"
-    volumes:
-      - redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - expenses-network
-    restart: unless-stopped
 
-  # 🤖 Bot Service (FastAPI Backend)
   bot-service:
-    build: 
+    build:
       context: ./bot-service
       dockerfile: Dockerfile
-    container_name: bot-service
+    ports:
+      - "8001:8001"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://expenses_user:expenses_pass@postgres:5432/expenses_db
+      - REDIS_URL=redis://redis:6379/0
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
-    environment:
-      - DATABASE_URL=postgresql+asyncpg://expenses_user:expenses_pass@postgres:5432/expenses_db
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-      - GROQ_API_KEY=${GROQ_API_KEY:-}
-      - MODEL_NAME=${MODEL_NAME:-llama3-8b-8192}
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - REDIS_URL=redis://redis:6379/0
-      - LOG_LEVEL=INFO
-      - ENVIRONMENT=production
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./bot-service:/app
-    networks:
-      - expenses-network
-    restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
 
-  # 🔄 Celery Worker
   celery-worker:
     build:
       context: ./bot-service
       dockerfile: celery.dockerfile
-    container_name: celery-worker
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://expenses_user:expenses_pass@postgres:5432/expenses_db
+      - REDIS_URL=redis://redis:6379/0
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
-    environment:
-      - DATABASE_URL=postgresql+asyncpg://expenses_user:expenses_pass@postgres:5432/expenses_db
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-      - GROQ_API_KEY=${GROQ_API_KEY:-}
-      - MODEL_NAME=${MODEL_NAME:-llama3-8b-8192}
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - REDIS_URL=redis://redis:6379/0
-      - LOG_LEVEL=INFO
-      - ENVIRONMENT=production
-    volumes:
-      - ./bot-service:/app
-    networks:
-      - expenses-network
-    restart: unless-stopped
+      bot-service:
+        condition: service_healthy
 
-  # 📊 Celery Flower (Optional - for monitoring)
   celery-flower:
     build:
       context: ./bot-service
       dockerfile: Dockerfile
-    container_name: celery-flower
-    command: celery -A app.core.celery_worker flower --port=5555
-    depends_on:
-      - redis
-      - celery-worker
-    environment:
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
     ports:
-      - "5555:5555"
-    networks:
-      - expenses-network
-    restart: unless-stopped
+      - "5556:5556"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://expenses_user:expenses_pass@postgres:5432/expenses_db
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["celery", "-A", "app.core.celery_worker", "flower", "--port=5556"]
+
+  frontend:
+    build:
+      context: ./frontend-bot-service
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8001
+      - NEXT_PUBLIC_APP_URL=http://localhost:3000
+    depends_on:
+      bot-service:
+        condition: service_healthy
+
+  connector-service:
+    build:
+      context: ./connector-service
+    ports:
+      - "3001:3000"
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - BOT_SERVICE_URL=http://bot-service:8001
+      - PORT=3000
+    depends_on:
+      bot-service:
+        condition: service_healthy
 
 volumes:
   postgres_data:
-    driver: local
-  redis_data:
-    driver: local
-
-networks:
-  expenses-network:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
