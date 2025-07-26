@@ -56,12 +56,12 @@ class ExpenseBot {
     const url = `${config.botService.url}/api/expenses`;
 
     const payload = {
-      telegram_id: telegramId,
-      text: messageText,
-      description: null,
-      amount: null,
-      category: null,
-      user_id: null
+      user_id: telegramId, // required string
+      description: messageText, // required string
+      amount: 1, // required float, dummy value (will be ignored by backend)
+      category: "Other", // required string, dummy value (will be ignored by backend)
+      telegram_id: telegramId, // required string
+      text: messageText // optional
     };
 
     const response = await fetch(url, {

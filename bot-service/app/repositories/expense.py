@@ -17,8 +17,11 @@ class ExpenseRepository:
                 print("Lookig for user with telegram_id:", telegram_id)
 
                 if not user:
-                    print("❌ User not found")
-                    return None
+                    print("❌ User not found, creating new user")
+                    user = User(id=telegram_id, telegram_id=telegram_id)
+                    session.add(user)
+                    await session.commit()
+                    await session.refresh(user)
                 print("User found:", user)
                 print("Text to categorize", text)
                 parsed = await categorize_expense(text)
