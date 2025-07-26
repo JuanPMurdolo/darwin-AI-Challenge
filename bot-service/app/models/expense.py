@@ -8,7 +8,7 @@ class Expense(Base):
     __tablename__ = "expenses"
     id = Column(Integer, primary_key=True)
     user_id = Column(String, ForeignKey("users.id"), nullable=False)
-    description = Column(Text, nullable=False)
+    description = Column(Text, nullable=False, unique=False)
     amount = Column(Numeric(10,2), nullable=False)
     category = Column(Text, nullable=False)
     added_at = Column(TIMESTAMP, nullable=False)

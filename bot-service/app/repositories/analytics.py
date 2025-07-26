@@ -19,6 +19,7 @@ class AnalyticsRepository:
                 query = (
                     select(Expense.category, func.sum(Expense.amount).label("total"))
                     .where(
+                        
                         Expense.user_id == user_id,
                         Expense.added_at >= start_date,
                         Expense.added_at <= end_date
@@ -92,6 +93,7 @@ class AnalyticsRepository:
         logger.info("Getting average by category", user_id=user_id, start_date=start_date, end_date=end_date)
         
         try:
+            AsyncSessionLocal = get_new_async_session()
             async with AsyncSessionLocal() as session:
                 query = (
                     select(

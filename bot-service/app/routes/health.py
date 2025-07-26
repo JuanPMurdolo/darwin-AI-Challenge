@@ -7,7 +7,7 @@ import redis
 from app.core.config import REDIS_URL
 from typing import Dict, Any
 
-router = APIRouter(prefix="/health", tags=["Health"])
+router = APIRouter()
 logger = get_logger(__name__)
 
 @router.get("/")
