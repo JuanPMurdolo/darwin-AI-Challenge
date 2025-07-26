@@ -95,3 +95,35 @@ async def get_analytics_sync(
     except Exception as e:
         logger.error("Error in sync analytics", error=str(e))
         raise HTTPException(status_code=500, detail=f"Error getting analytics: {str(e)}")
+
+@router.get("/overview/{user_id}")
+async def get_overview(user_id: str):
+    """Get expense overview for a user (for frontend dashboard)"""
+    try:
+        analytics_request = AnalyticsRequest(user_id=user_id)
+        service = AnalyticsService()
+        result = await service.get_expense_analytics(analytics_request)
+        # Compose overview data
+        overview = {
+            "total_expenses": result.total_expenses,
+            "expense_count": len(result.category_breakdown),
+            "average_expense": (result.total_expenses / len(result.category_breakdown)) if result.category_breakdown else 0.0,
+            "monthly_variation_percentage": result.monthly_variation_percentage,
+        }
+        return overview
+    except Exception as e:
+        logger.error("Error in get_overview", error=str(e))
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/category-summary/{user_id}")
+async def get_category_summary(user_id: str):
+    """Get category summary for a user (for frontend chart)"""
+    try:
+        analytics_request = AnalyticsRequest(user_id=user_id)
+        service = AnalyticsService()
+        result = await service.get_expense_analytics(analytics_request)
+        # Return category breakdown as expected by frontend
+        return [cb.model_dump() for cb in result.category_breakdown]
+    except Exception as e:
+        logger.error("Error in get_category_summary", error=str(e))
+        raise HTTPException(status_code=500, detail=str(e))

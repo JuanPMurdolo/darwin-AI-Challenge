@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts"
 import { TrendingUp, PieChartIcon } from "lucide-react"
-import { apiClient, type CategoryData } from "@/lib/api"
+import { api } from "@/lib/api"
 
 const COLORS = [
   "#3B82F6",
@@ -22,7 +22,7 @@ const COLORS = [
 ]
 
 export function ExpenseChart() {
-  const [categoryData, setCategoryData] = useState<CategoryData[]>([])
+  const [categoryData, setCategoryData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [chartType, setChartType] = useState<"bar" | "pie">("bar")
@@ -31,8 +31,7 @@ export function ExpenseChart() {
     const fetchCategoryData = async () => {
       try {
         setLoading(true)
-        // Using mock user ID - in real app, get from auth context
-        const data = await apiClient.getCategoryData(1)
+        const data = await api.getCategorySummary(1)
         setCategoryData(data)
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch chart data")
@@ -70,7 +69,8 @@ export function ExpenseChart() {
     )
   }
 
-  const totalAmount = categoryData.reduce((sum, item) => sum + item.total, 0)
+  // Fix reduce parameter types
+  const totalAmount = categoryData.reduce((sum: number, item: any) => sum + item.total, 0)
 
   return (
     <Card className="bg-gradient-to-br from-white to-gray-50 border-0 shadow-xl">
@@ -138,12 +138,14 @@ export function ExpenseChart() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ category, total }) => `${category}: $${total.toFixed(0)}`}
+                    // Fix Pie label types
+                    label={({ category, total }: { category: string; total: number }) => `${category}: $${total.toFixed(0)}`}
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="total"
                   >
-                    {categoryData.map((entry, index) => (
+                    {categoryData.map((entry: any, index: number) => (
+                      // Fix map parameter types
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>

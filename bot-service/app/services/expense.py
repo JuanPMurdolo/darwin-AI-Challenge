@@ -42,7 +42,12 @@ class ExpenseService:
     async def delete_expense(self, expense_id: int):
         return await self.expense_repo.delete_expense(expense_id)
     
-    async def update_expense(self, expense_id: int, description: str, amount: float, category: str):
+    async def update_expense(self, expense_id: int, expense_update: dict):
+        description = expense_update.description
+        amount = expense_update.amount
+        category = expense_update.category
+        if not all([description, amount, category]):
+            raise ValueError("Description, amount, and category are required to update an expense.")
         return await self.expense_repo.update_expense(expense_id, description, amount, category)
     
     async def get_expense_analytics(self, user_id: int, start_date: str, end_date: str):

@@ -58,7 +58,7 @@ export function ExpenseOverview() {
   const cards = [
     {
       title: "Total Expenses",
-      value: `$${overview.total_amount.toFixed(2)}`,
+      value: `$${(overview.total_expenses ?? 0).toFixed(2)}`,
       change: "+12.5%",
       trend: "up" as const,
       icon: DollarSign,
@@ -66,7 +66,7 @@ export function ExpenseOverview() {
     },
     {
       title: "Expense Count",
-      value: overview.expense_count.toString(),
+      value: (overview.expense_count ?? 0).toString(),
       change: "+3 this week",
       trend: "up" as const,
       icon: CreditCard,
@@ -74,7 +74,7 @@ export function ExpenseOverview() {
     },
     {
       title: "Average Amount",
-      value: `$${overview.average_amount.toFixed(2)}`,
+      value: `$${(overview.average_expense ?? 0).toFixed(2)}`,
       change: "-2.1%",
       trend: "down" as const,
       icon: Target,
@@ -83,8 +83,8 @@ export function ExpenseOverview() {
     {
       title: "Monthly Budget",
       value: "$2,500",
-      change: `${((overview.total_amount / 2500) * 100).toFixed(1)}% used`,
-      trend: overview.total_amount > 2000 ? "down" : ("up" as const),
+      change: `${((overview.total_expenses ?? 0) / 2500 * 100).toFixed(1)}% used`,
+      trend: (overview.total_expenses ?? 0) > 2000 ? "down" : ("up" as const),
       icon: Activity,
       gradient: "from-orange-500 to-red-600",
     },
