@@ -7,7 +7,7 @@ export const config = {
     botToken: process.env.TELEGRAM_BOT_TOKEN,
   },
   botService: {
-    url: process.env.BOT_SERVICE_URL || "http://localhost:8000",
+    url: process.env.BOT_SERVICE_URL || "http://localhost:8001",
   },
   server: {
     port: process.env.PORT || 3000

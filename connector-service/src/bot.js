@@ -53,7 +53,7 @@ class ExpenseBot {
   }
 
   async sendToBotService(telegramId, messageText) {
-    const url = `${config.botService.url}/expense/add`;
+    const url = `${config.botService.url}/api/expenses`;
 
     const payload = {
       telegram_id: telegramId,
