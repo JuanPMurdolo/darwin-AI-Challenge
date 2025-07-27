@@ -16,6 +16,10 @@ class AnalyticsService:
         logger.info("Starting expense analytics", user_id=data.user_id, start_date=data.start_date, end_date=data.end_date)
         
         try:
+            # Validación de rango de fechas
+            if data.start_date and data.end_date:
+                if data.start_date > data.end_date:
+                    raise ValueError("start_date debe ser anterior o igual a end_date.")
             start_date = data.start_date or date.min
             end_date = data.end_date or date.max
 
