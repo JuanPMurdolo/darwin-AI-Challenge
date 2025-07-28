@@ -53,36 +53,47 @@ class ExpenseRepository:
             traceback.print_exc()
             return None
         
-    async def get_expenses(self, user_id: int, skip: int = 0, limit: int = 10):
+    async def get_expenses(self, user_id: str, skip: int = 0, limit: int = 10):
         async with AsyncSessionLocal() as session:
             result = await session.execute(select(User).where(User.id == user_id))
             user = result.scalar_one_or_none()
-
             if not user:
-                logger.warning("Unauthorized access attempt by user_id", user_id=user_id)
+                logger.warning(f"Unauthorized access attempt by user_id={user_id}")
                 return {"message": "Unauthorized"}
 
             query = select(Expense).where(Expense.user_id == user.id).offset(skip).limit(limit)
             expenses = await session.execute(query)
             return expenses.scalars().all()
 
-    async def get_all_expenses(self, skip= 0, limit=100):
+    async def get_all_expenses(self, skip=0, limit=100):
         async with AsyncSessionLocal() as session:
-            logger.info("Fetching all expenses with skip:", skip, "and limit:", limit)
+            logger.info(f"Fetching all expenses with skip={skip} and limit={limit}")
             query = select(Expense).offset(skip).limit(limit)
             expenses = await session.execute(query)
             return expenses.scalars().all()
         
     async def get_expense_by_id(self, expense_id: int):
         async with AsyncSessionLocal() as session:
-            logger.info("Fetching expense by ID:", expense_id=expense_id)
+            logger.info(f"Fetching expense by ID: {expense_id}")
             result = await session.execute(select(Expense).where(Expense.id == expense_id))
             expense = result.scalar_one_or_none()
 
             if not expense:
                 return {"message": "Expense not found"}
 
-            return expense
+            # Buscar el usuario y agregar telegram_id
+            user_result = await session.execute(select(User).where(User.id == expense.user_id))
+            user = user_result.scalar_one_or_none()
+            expense_dict = {
+                "id": expense.id,
+                "user_id": expense.user_id,
+                "description": expense.description,
+                "amount": expense.amount,
+                "category": expense.category,
+                "added_at": expense.added_at,
+                "telegram_id": user.telegram_id if user else None
+            }
+            return expense_dict
         
     async def delete_expense(self, expense_id: int):
         async with AsyncSessionLocal() as session:
@@ -101,13 +112,13 @@ class ExpenseRepository:
         
     async def update_expense(self, expense_id: int, description: str = None, amount: float = None, category: str = None):
         async with AsyncSessionLocal() as session:
-            logger.info("Updating expense with ID:", expense_id=expense_id)
+            logger.info(f"Updating expense with ID: {expense_id}")
             result = await session.execute(select(Expense).where(Expense.id == expense_id))
             expense = result.scalar_one_or_none()
 
             if not expense:
-                logger.warning("Attempted to update non-existent expense", expense_id=expense_id)
-                return {"message": "Expense not found"}
+                logger.warning(f"Attempted to update non-existent expense: {expense_id}")
+                return None
 
             if description:
                 expense.description = description
@@ -116,10 +127,22 @@ class ExpenseRepository:
             if category:
                 expense.category = category
 
-            logger.info("Committing updated expense to DB", expense=expense)
-
             await session.commit()
-            return {"message": "Expense updated successfully"}
+            await session.refresh(expense)
+
+            # Buscar el usuario y agregar telegram_id
+            user_result = await session.execute(select(User).where(User.id == expense.user_id))
+            user = user_result.scalar_one_or_none()
+            expense_dict = {
+                "id": expense.id,
+                "user_id": expense.user_id,
+                "description": expense.description,
+                "amount": expense.amount,
+                "category": expense.category,
+                "added_at": expense.added_at,
+                "telegram_id": user.telegram_id if user else None
+            }
+            return expense_dict
         
     async def get_expense_analytics(self, user_id: int, start_date: str, end_date: str):
         async with AsyncSessionLocal() as session:

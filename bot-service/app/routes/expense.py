@@ -1,11 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from typing import List
 
 from app.core.db import get_db
 from app.core.logging import get_logger
 from app.services.expense import ExpenseService
 from app.schemas.expense import ExpenseCreate, ExpenseUpdate, ExpenseResponse
+from app.models.user import User  # Asegúrate de importar el modelo de User
 
 router = APIRouter()
 logger = get_logger(__name__)
@@ -23,6 +25,7 @@ async def get_expenses(
         expenses = await service.get_expenses(skip=skip, limit=limit)
         return expenses
     except Exception as e:
+        logger.error("Error fetching expenses", error=str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -48,18 +51,18 @@ async def get_expense(
 ):
     """Get a specific expense by ID"""
     try:
-        logger.info("Fetching expense by ID", expense_id=expense_id)
+        logger.info(f"Fetching expense by ID: {expense_id}")
         service = ExpenseService()
-        expense = await service.get_expense(expense_id)
-        if not expense:
-            logger.warning("Expense not found", expense_id=expense_id)
+        expense = await service.get_expense_by_id(expense_id)
+        if not expense or "message" in expense:
+            logger.warning(f"Expense not found: {expense_id}")
             raise HTTPException(status_code=404, detail="Expense not found")
-        return expense
+        return ExpenseResponse(**expense)
     except HTTPException:
-        logger.error("Error fetching expense", expense_id=expense_id)
+        logger.error(f"Error fetching expense: {expense_id}")
         raise
     except Exception as e:
-        logger.error("Unexpected error fetching expense", expense_id=expense_id, error=str(e))
+        logger.error(f"Unexpected error fetching expense: {expense_id}, error={str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

@@ -10,9 +10,12 @@ from sqlalchemy import select
 from app.core.logging import get_logger
 
 load_dotenv()
+logger = get_logger(__name__)
+
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
+    logger.error("❌ DATABASE_URL is not set in the environment.")
     raise ValueError("❌ DATABASE_URL is not set in the environment.")
 
 engine = create_async_engine(DATABASE_URL, echo=False)
@@ -22,8 +25,6 @@ AsyncSessionLocal = sessionmaker(
     class_=AsyncSession,
     expire_on_commit=False
 )
-
-logger = get_logger(__name__)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
