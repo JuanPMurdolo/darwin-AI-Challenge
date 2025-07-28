@@ -1,219 +1,219 @@
 # darwin-AI-Challenge
 
-# Telegram Expense Tracking Bot
+# Bot de Seguimiento de Gastos en Telegram
 
-A sophisticated Telegram bot system that allows users to track expenses through natural language messages. The system uses AI to parse and categorize expenses automatically.
+Un sistema avanzado de bots para Telegram que permite a los usuarios registrar gastos mediante mensajes en lenguaje natural. El sistema utiliza IA para analizar y categorizar automáticamente los gastos.
 
-## Architecture
+## Arquitectura
 
-The system consists of two microservices:
+El sistema está compuesto por dos microservicios:
 
-### 1. Bot Service (Python)
-- **Technology**: FastAPI, LangChain, OpenAI, PostgreSQL
-- **Purpose**: Processes messages using AI to extract and categorize expenses
-- **Features**: 
-  - Natural language processing with LangChain + OpenAI
-  - Automatic expense categorization
-  - User whitelist verification
-  - Concurrent request handling
+### 1. Servicio Bot (Python)
+- **Tecnologías**: FastAPI, LangChain, OpenAI, PostgreSQL
+- **Propósito**: Procesa mensajes usando IA para extraer y categorizar gastos
+- **Características**:
+  - Procesamiento de lenguaje natural con LangChain + OpenAI
+  - Categorización automática de gastos
+  - Verificación de usuarios autorizados (whitelist)
+  - Manejo concurrente de solicitudes
 
-### 2. Connector Service (Node.js)
-- **Technology**: Node.js, Express, Telegram Bot API
-- **Purpose**: Handles Telegram interactions and forwards messages to Bot Service
-- **Features**:
-  - Telegram webhook/polling management
-  - Message routing and response handling
-  - Error management and user feedback
+### 2. Servicio Conector (Node.js)
+- **Tecnologías**: Node.js, Express, Telegram Bot API
+- **Propósito**: Gestiona la interacción con Telegram y reenvía mensajes al Servicio Bot
+- **Características**:
+  - Gestión de webhooks/polling de Telegram
+  - Enrutamiento de mensajes y respuestas
+  - Manejo de errores y feedback al usuario
 
-## Features
+## Funcionalidades
 
-✅ **Natural Language Processing**: Users can send messages like "Pizza 20 bucks" or "Gas $45"  
-✅ **Automatic Categorization**: AI categorizes expenses into predefined categories  
-✅ **User Whitelist**: Only authorized users can use the bot  
-✅ **Concurrent Processing**: Handles multiple users simultaneously  
-✅ **Error Handling**: Graceful handling of invalid messages and errors  
-✅ **Easy Deployment**: Ready for Vercel, Railway, or other PaaS platforms  
+✅ **Procesamiento de Lenguaje Natural**: Envía mensajes como "Pizza 20 pesos" o "Nafta $45"
+✅ **Categorización Automática**: La IA categoriza los gastos en categorías predefinidas
+✅ **Whitelist de Usuarios**: Solo usuarios autorizados pueden usar el bot
+✅ **Procesamiento Concurrente**: Maneja múltiples usuarios simultáneamente
+✅ **Manejo de Errores**: Gestión elegante de mensajes inválidos y errores
+✅ **Despliegue Sencillo**: Listo para Vercel, Railway u otras plataformas
 
-## Quick Start
+## Inicio Rápido
 
-### Prerequisites
+### Requisitos
 
 - Python 3.11+
 - Node.js LTS (18+)
-- PostgreSQL database
-- OpenAI API key
-- Telegram Bot Token
+- Base de datos PostgreSQL
+- Clave API de OpenAI
+- Token de Bot de Telegram
 
-### 1. Database Setup
+### 1. Configuración de la Base de Datos
 
-\`\`\`bash
-# Set up PostgreSQL and run the setup script
-psql -d your_database -f scripts/01-create-database.sql
-\`\`\`
+```bash
+# Configura PostgreSQL y ejecuta el script de inicialización
+psql -d tu_base_de_datos -f scripts/01-create-database.sql
+```
 
-### 2. Bot Service Setup
+### 2. Servicio Bot
 
-\`\`\`bash
+```bash
 cd bot-service
 pip install -r requirements.txt
 cp .env.example .env
-# Edit .env with your configuration
+# Edita .env con tu configuración
 python main.py
-\`\`\`
+```
 
-### 3. Connector Service Setup
+### 3. Servicio Conector
 
-\`\`\`bash
+```bash
 cd connector-service
 npm install
 cp .env.example .env
-# Edit .env with your configuration
+# Edita .env con tu configuración
 npm start
-\`\`\`
+```
 
-## Configuration
+## Configuración
 
-### Environment Variables
+### Variables de Entorno
 
-**Bot Service (.env)**:
-\`\`\`env
-DATABASE_URL=postgresql://username:password@localhost:5432/expense_bot
-OPENAI_API_KEY=your_openai_api_key
+**Servicio Bot (.env):**
+```env
+DATABASE_URL=postgresql://usuario:contraseña@localhost:5432/expense_bot
+OPENAI_API_KEY=tu_clave_openai
 PORT=8000
-\`\`\`
+```
 
-**Connector Service (.env)**:
-\`\`\`env
-TELEGRAM_BOT_TOKEN=your_telegram_bot_token
+**Servicio Conector (.env):**
+```env
+TELEGRAM_BOT_TOKEN=tu_token_telegram
 BOT_SERVICE_URL=http://localhost:8000
 PORT=3000
-\`\`\`
+```
 
-### Adding Users to Whitelist
+### Agregar Usuarios Autorizados (Whitelist)
 
-Add Telegram user IDs to the database:
+Agrega el ID de usuario de Telegram a la base de datos:
 
-\`\`\`sql
+```sql
 INSERT INTO users (telegram_id) VALUES ('123456789');
-\`\`\`
+```
 
-To find a user's Telegram ID, you can use bots like @userinfobot.
+Para obtener el ID de Telegram de un usuario, puedes usar bots como @userinfobot.
 
-## Usage Examples
+## Ejemplos de Uso
 
-Once the bot is running, users can send messages like:
+Una vez que el bot está funcionando, los usuarios pueden enviar mensajes como:
 
-- "Coffee 5 dollars" → Food expense added ✅
-- "Uber ride $15" → Transportation expense added ✅
-- "Electric bill 120" → Utilities expense added ✅
-- "Movie tickets 25 bucks" → Entertainment expense added ✅
+- "Café 5 dólares" → Gasto de comida agregado ✅
+- "Uber $15" → Gasto de transporte agregado ✅
+- "Luz 120" → Gasto de servicios agregado ✅
+- "Cine 25 pesos" → Gasto de entretenimiento agregado ✅
 
-## Categories
+## Categorías
 
-The bot automatically categorizes expenses into:
-- Housing
-- Transportation  
-- Food
-- Utilities
-- Insurance
-- Medical/Healthcare
-- Savings
-- Debt
-- Education
-- Entertainment
-- Other
+El bot categoriza automáticamente los gastos en:
+- Vivienda
+- Transporte
+- Comida
+- Servicios
+- Seguros
+- Salud
+- Ahorro
+- Deuda
+- Educación
+- Entretenimiento
+- Otros
 
-## Deployment
+## Despliegue
 
-### Vercel (Recommended)
+### Vercel (Recomendado)
 
-1. Push code to GitHub
-2. Connect repository to Vercel
-3. Set environment variables in Vercel dashboard
-4. Deploy!
+1. Sube el código a GitHub
+2. Conecta el repositorio a Vercel
+3. Configura las variables de entorno en el panel de Vercel
+4. ¡Despliega!
 
 ### Railway
 
-1. Connect GitHub repository
-2. Set environment variables
-3. Deploy both services
+1. Conecta el repositorio de GitHub
+2. Configura las variables de entorno
+3. Despliega ambos servicios
 
-### Supabase (Database)
+### Supabase (Base de datos)
 
-1. Create a new Supabase project
-2. Run the SQL script in the SQL editor
-3. Use the connection string in your environment variables
+1. Crea un proyecto en Supabase
+2. Ejecuta el script SQL en el editor de Supabase
+3. Usa el string de conexión en tus variables de entorno
 
-## API Documentation
+## Documentación de la API
 
-### Bot Service
+### Servicio Bot
 
 **POST /process-message**
-\`\`\`json
+```json
 {
   "telegram_id": "123456789",
-  "message": "Pizza 20 bucks"
+  "message": "Pizza 20 pesos"
 }
-\`\`\`
+```
 
-**Response**:
-\`\`\`json
+**Respuesta:**
+```json
 {
   "success": true,
-  "message": "Food expense added ✅",
-  "category": "Food"
+  "message": "Gasto de comida agregado ✅",
+  "category": "Comida"
 }
-\`\`\`
+```
 
-### Health Checks
+### Endpoints de Salud
 
-Both services provide health check endpoints:
-- Bot Service: `GET /health`
-- Connector Service: `GET /health`
+Ambos servicios proveen endpoints para verificar el estado:
+- Servicio Bot: `GET /health`
+- Servicio Conector: `GET /health`
 
-## Development
+## Desarrollo
 
-### Running in Development
+### Ejecución en Desarrollo
 
-**Terminal 1 (Bot Service)**:
-\`\`\`bash
+**Terminal 1 (Servicio Bot):**
+```bash
 cd bot-service
 python main.py
-\`\`\`
+```
 
-**Terminal 2 (Connector Service)**:
-\`\`\`bash
+**Terminal 2 (Servicio Conector):**
+```bash
 cd connector-service
 npm run dev
-\`\`\`
+```
 
-### Testing
+### Pruebas
 
-Test the bot service directly:
-\`\`\`bash
+Prueba el servicio bot directamente:
+```bash
 curl -X POST http://localhost:8000/process-message \
   -H "Content-Type: application/json" \
-  -d '{"telegram_id": "123456789", "message": "Coffee 5 dollars"}'
-\`\`\`
+  -d '{"telegram_id": "123456789", "message": "Café 5 dólares"}'
+```
 
-## Best Practices Implemented
+## Buenas Prácticas Implementadas
 
-- ✅ **Microservices Architecture**: Separation of concerns
-- ✅ **Environment Configuration**: No hardcoded values
-- ✅ **Error Handling**: Comprehensive error management
-- ✅ **Logging**: Structured logging throughout
-- ✅ **Database Connection Pooling**: Efficient database usage
-- ✅ **Type Safety**: Pydantic models and TypeScript support
-- ✅ **Graceful Shutdown**: Proper cleanup on termination
-- ✅ **Health Checks**: Monitoring and debugging support
+- ✅ **Arquitectura de Microservicios**: Separación de responsabilidades
+- ✅ **Configuración por Entorno**: Sin valores hardcodeados
+- ✅ **Manejo de Errores**: Gestión integral de errores
+- ✅ **Logging**: Registro estructurado en todos los servicios
+- ✅ **Pool de Conexiones a BD**: Uso eficiente de la base de datos
+- ✅ **Tipado Estricto**: Modelos Pydantic y soporte TypeScript
+- ✅ **Apagado Elegante**: Limpieza adecuada al terminar
+- ✅ **Endpoints de Salud**: Soporte para monitoreo y debugging
 
-## Troubleshooting
+## Solución de Problemas
 
-### Common Issues
+### Problemas Comunes
 
-1. **Bot not responding**: Check if both services are running and can communicate
-2. **Database connection errors**: Verify DATABASE_URL and database accessibility
-3. **OpenAI API errors**: Check API key and rate limits
-4. **Telegram webhook issues**: Ensure bot token is correct and bot is started
+1. **El bot no responde**: Verifica que ambos servicios estén corriendo y puedan comunicarse
+2. **Errores de conexión a la base de datos**: Revisa `DATABASE_URL` y la accesibilidad de la base
+3. **Errores de OpenAI API**: Verifica la clave y los límites de uso
+4. **Problemas con el webhook de Telegram**: Asegúrate de que el token es correcto y el bot está iniciado
 
-This was tested on Railway https://railway.com/new
+Probado en Railway: https://railway.com/

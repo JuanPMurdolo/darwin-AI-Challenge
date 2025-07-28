@@ -1,41 +1,53 @@
 # Bot Service
 
-Python service that parses and categorizes expenses from Telegram messages using LangChain and OpenAI.
+Servicio Python que analiza y categoriza gastos desde mensajes de Telegram usando LangChain y OpenAI.
 
-## Features
+## Características
+- Clasificación de mensajes
+- Categorización de gastos
+- Lista blanca de usuarios
+- Manejo asíncrono y concurrente de requests
+- Integración con PostgreSQL
 
-- Message classification
-- Expense categorization
-- User whitelist
-- Async & concurrent request handling
-- PostgreSQL integration
+## Configuración del entorno
 
-## Setup
+1. Instala Python 3.11+
+2. Crea un archivo `.env` con las siguientes variables:
+    - `OPENAI_API_KEY=tu_clave`
+    - `DATABASE_URL=postgresql+asyncpg://usuario:contraseña@localhost:5432/expenses_db`
+    - `TELEGRAM_BOT_TOKEN=tu_token` (si usas integración Telegram)
+    - `MODEL_NAME` (Para usar Groq)s
+    - `GROQ_API_KEY` (API Key de Groq)
+    - `REDIS_URL = redis://redis:6379/0`
+    - `CELERY_BROKER_URL = redis://redis:6379/0`
+    - `CELERY_RESULT_BACKEND = redis://redis:6379/0`
 
-1. Install Python 3.11+
-2. Create a `.env` file:
-    * OPENAI_API_KEY=your_key
-    *   DATABASE_URL=postgresql+asyncpg://user:pass@localhost:5432/expenses_db
-
-3. Install deps
-```
+3. Instala dependencias:
+```bash
 pip install -r requirements.txt
 ```
 
-3. Run server:
-uvicorn app.main:app --reload --port 8000
-or
+4. Ejecuta el servidor:
+```bash
 docker-compose up --build
+```
 
-4. Endpoints:
-    * POST /expense/add: Parses a Telegram message and stores the expense
-    * GET /expense/list 
-    * GET /expense/id
-    * DELETE /expense/id
-    * PUT /expense/id
+5. Endpoints principales:
+- `POST /expense/add`: Analiza un mensaje de Telegram y almacena el gasto
+- `GET /expense/list`: Lista todos los gastos
+- `GET /expense/id`: Obtiene un gasto por ID
+- `DELETE /expense/id`: Elimina un gasto
+- `PUT /expense/id`: Actualiza un gasto
 
-5. Testing
-python tests/test_integration.py
+6. Testing:
+```bash
+./run_tests.sh
+```
+
+## Notas
+- Para desarrollo local puedes usar SQLite: `DATABASE_URL=sqlite+aiosqlite:///./test.db`
+- Para pruebas con Docker y PostgreSQL, asegúrate de tener los servicios levantados.
+- Revisa el archivo `.env.example` para ejemplos de configuración.
 
 
 
