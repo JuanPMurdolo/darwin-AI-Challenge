@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
 from app.core.db import get_db
+from app.core.logging import get_logger
 from app.services.expense import ExpenseService
 from app.schemas.expense import ExpenseCreate, ExpenseUpdate, ExpenseResponse
 
