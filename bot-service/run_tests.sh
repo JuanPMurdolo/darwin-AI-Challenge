@@ -3,18 +3,14 @@
 echo "🧪 Running Darwin AI Challenge Tests - Fixed Version"
 echo "=================================================="
 
-# Set testing flag
 export TESTING=1
 
-# Always use local SQLite for testing
 export DATABASE_URL="sqlite+aiosqlite:///./test.db"
 echo "ℹ️  Using SQLite for local testing"
 
-# Install dependencies if not already installed
 echo "📦 Installing test dependencies..."
 pip install pytest pytest-asyncio httpx aiosqlite > /dev/null 2>&1
 
-# Clean up any existing test database
 rm -f ./test.db
 
 echo ""
