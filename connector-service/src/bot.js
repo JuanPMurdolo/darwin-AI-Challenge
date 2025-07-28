@@ -56,12 +56,12 @@ class ExpenseBot {
     const url = `${config.botService.url}/api/expenses`;
 
     const payload = {
-      user_id: telegramId, // required string
-      description: messageText, // required string
-      amount: 1, // required float, dummy value (will be ignored by backend)
-      category: "Other", // required string, dummy value (will be ignored by backend)
-      telegram_id: telegramId, // required string
-      text: messageText // optional
+      user_id: telegramId,
+      description: messageText,
+      amount: 1,
+      category: "Other",
+      telegram_id: telegramId,
+      text: messageText
     };
 
     const response = await fetch(url, {
@@ -70,7 +70,6 @@ class ExpenseBot {
       body: JSON.stringify(payload)
     });
 
-    // Accept any 2xx response as success
     if (response.ok) {
       const data = await response.json();
       return { status: "success", message: `Expense added: ${data.description} $${data.amount}` };

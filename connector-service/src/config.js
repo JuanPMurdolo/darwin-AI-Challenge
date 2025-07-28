@@ -15,7 +15,6 @@ export const config = {
   environment: process.env.NODE_ENV || "development",
 }
 
-// Validate required configuration
 const requiredEnvVars = ["TELEGRAM_BOT_TOKEN"]
 
 for (const envVar of requiredEnvVars) {

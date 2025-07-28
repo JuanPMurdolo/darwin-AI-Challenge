@@ -5,10 +5,8 @@ import { ExpenseBot } from "./bot.js";
 
 const app = express()
 
-// Middleware
 app.use(express.json())
 
-// Health check endpoint
 app.get("/health", (req, res) => {
   res.json({
     status: "healthy",
@@ -17,8 +15,6 @@ app.get("/health", (req, res) => {
   })
 })
 
-
-// Start server
 const server = app.listen(config.server.port, () => {
   logger.info(`Connector service listening on port ${config.server.port}`)
 })
@@ -26,7 +22,6 @@ const server = app.listen(config.server.port, () => {
 const bot = new ExpenseBot();
 bot.start();
 
-// Graceful shutdown
 process.on("SIGTERM", () => {
   logger.info("SIGTERM received, shutting down gracefully")
   server.close(() => {
