@@ -7,7 +7,7 @@ from app.core.db import get_db
 from app.core.logging import get_logger
 from app.services.expense import ExpenseService
 from app.schemas.expense import ExpenseCreate, ExpenseUpdate, ExpenseResponse
-from app.models.user import User  # Asegúrate de importar el modelo de User
+from app.models.user import User
 
 router = APIRouter()
 logger = get_logger(__name__)

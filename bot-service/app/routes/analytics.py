@@ -122,7 +122,6 @@ async def get_category_summary(user_id: str):
         analytics_request = AnalyticsRequest(user_id=user_id)
         service = AnalyticsService()
         result = await service.get_expense_analytics(analytics_request)
-        # Return category breakdown as expected by frontend
         return [cb.model_dump() for cb in result.category_breakdown]
     except Exception as e:
         logger.error("Error in get_category_summary", error=str(e))

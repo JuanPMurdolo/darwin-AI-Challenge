@@ -20,10 +20,8 @@ class TestAnalyticsRepository:
             date(2024, 1, 31)
         )
         
-        # Should have 2 categories in January
         assert len(result) == 2
         
-        # Convert to dict for easier testing
         summary_dict = {row[0]: float(row[1]) for row in result}
         assert summary_dict["Food"] == 25.50
         assert summary_dict["Transportation"] == 15.00
@@ -52,7 +50,7 @@ class TestAnalyticsRepository:
             date(2024, 1, 31)
         )
         
-        assert float(total) == 40.50  # 25.50 + 15.00
+        assert float(total) == 40.50
 
     @pytest.mark.asyncio
     async def test_get_total_expenses_no_data(self, test_user):
@@ -78,12 +76,9 @@ class TestAnalyticsRepository:
             date(2024, 2, 28)
         )
         
-        # Convert to dict for easier testing
         avg_dict = {row[0]: float(row[1]) for row in result}
         
-        # Food category: (25.50 + 30.00) / 2 = 27.75
         assert avg_dict["Food"] == 27.75
-        # Transportation: 15.00 / 1 = 15.00
         assert avg_dict["Transportation"] == 15.00
 
     @pytest.mark.asyncio
@@ -91,11 +86,9 @@ class TestAnalyticsRepository:
         """Test monthly variation calculation with increase"""
         repo = AnalyticsRepository()
         
-        # Mock the get_total_expenses method for this test
         from unittest.mock import AsyncMock, patch
         
         with patch.object(repo, 'get_total_expenses') as mock_get_total:
-            # Current month: 100, Previous month: 80
             mock_get_total.side_effect = [Decimal('100'), Decimal('80')]
             
             variation = await repo.get_monthly_variation(
@@ -104,7 +97,6 @@ class TestAnalyticsRepository:
                 date(2024, 1, 1)
             )
             
-            # (100 - 80) / 80 * 100 = 25%
             assert variation == 25.0
 
     @pytest.mark.asyncio
@@ -115,7 +107,6 @@ class TestAnalyticsRepository:
         from unittest.mock import AsyncMock, patch
         
         with patch.object(repo, 'get_total_expenses') as mock_get_total:
-            # Current month: 100, Previous month: None
             mock_get_total.side_effect = [Decimal('100'), None]
             
             variation = await repo.get_monthly_variation(
@@ -143,16 +134,13 @@ class TestAnalyticsService:
         
         result = await service.get_expense_analytics(request)
         
-        # Check total expenses
         assert result.total_expenses == 40.50
         
-        # Check category breakdown
         assert len(result.category_breakdown) == 2
         categories = {cb.category: cb.total for cb in result.category_breakdown}
         assert categories["Food"] == 25.50
         assert categories["Transportation"] == 15.00
-        
-        # Check date range
+
         assert result.start_date == date(2024, 1, 1)
         assert result.end_date == date(2024, 1, 31)
 
@@ -165,14 +153,11 @@ class TestAnalyticsService:
         
         result = await service.get_expense_analytics(request)
         
-        # Should include all expenses: 25.50 + 15.00 + 30.00 = 70.50
         assert result.total_expenses == 70.50
         assert len(result.category_breakdown) == 2
         
-        # Check averages
         assert "Food" in result.average_by_category
         assert "Transportation" in result.average_by_category
-        # Food average: (25.50 + 30.00) / 2 = 27.75
         assert result.average_by_category["Food"] == 27.75
 
     @pytest.mark.asyncio
@@ -215,7 +200,7 @@ class TestAnalyticsService:
         
         request = AnalyticsRequest(
             user_id=test_user.id,
-            start_date=date(2024, 12, 31),  # Start after end
+            start_date=date(2024, 12, 31),
             end_date=date(2024, 1, 1)
         )
         
@@ -227,7 +212,6 @@ class TestAnalyticsService:
         """Test analytics with monthly variation calculation"""
         service = AnalyticsService()
         
-        # Mock the monthly variation calculation
         from unittest.mock import patch
         
         with patch.object(service.repo, 'get_monthly_variation', return_value=15.5):
@@ -246,7 +230,6 @@ class TestAnalyticsService:
         """Test analytics when monthly variation calculation fails"""
         service = AnalyticsService()
         
-        # Mock the monthly variation to raise an exception
         from unittest.mock import patch
         
         with patch.object(service.repo, 'get_monthly_variation', side_effect=Exception("DB Error")):
@@ -258,5 +241,4 @@ class TestAnalyticsService:
             
             result = await service.get_expense_analytics(request)
             
-            # Should default to 0.0 when calculation fails
             assert result.monthly_variation_percentage == 0.0

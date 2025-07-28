@@ -18,8 +18,6 @@ def run_analytics_task(self, payload: Dict[str, Any]) -> Dict[str, Any]:
     try:
         service = AnalyticsService()
         request = AnalyticsRequest(**payload)
-
-        # Create new event loop for async operations
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         
@@ -35,5 +33,4 @@ def run_analytics_task(self, payload: Dict[str, Any]) -> Dict[str, Any]:
             
     except Exception as e:
         logger.error("Analytics task failed", task_id=task_id, error=str(e))
-        # Re-raise the exception so Celery can handle it properly
         raise self.retry(exc=e, countdown=60, max_retries=3)

@@ -24,13 +24,11 @@ class TestUserModel:
     @pytest.mark.asyncio
     async def test_user_database_operations(self, db_session):
         """Test user database operations"""
-        # Create user
         user = User(id="db_test_user", telegram_id="987654321")
         db_session.add(user)
         await db_session.commit()
         await db_session.refresh(user)
-        
-        # Verify user was saved
+
         assert user.id == "db_test_user"
         assert user.telegram_id == "987654321"
 
@@ -81,7 +79,6 @@ class TestExpenseModel:
     @pytest.mark.asyncio
     async def test_expense_database_operations(self, db_session, test_user):
         """Test expense database operations"""
-        # Create expense
         expense = Expense(
             user_id=test_user.id,
             description="Database test expense",
@@ -94,7 +91,6 @@ class TestExpenseModel:
         await db_session.commit()
         await db_session.refresh(expense)
         
-        # Verify expense was saved
         assert expense.id is not None
         assert expense.user_id == test_user.id
         assert expense.description == "Database test expense"
@@ -104,12 +100,10 @@ class TestExpenseModel:
     @pytest.mark.asyncio
     async def test_expense_foreign_key_relationship(self, db_session):
         """Test expense foreign key relationship with user"""
-        # Create user first
         user = User(id="fk_test_user", telegram_id="111222333")
         db_session.add(user)
         await db_session.commit()
         
-        # Create expense with valid user_id
         expense = Expense(
             user_id=user.id,
             description="FK test expense",
@@ -129,10 +123,9 @@ class TestExpenseModel:
         expense = Expense(
             user_id="test_user",
             description="Precision test",
-            amount=Decimal("123.456"),  # More than 2 decimal places
+            amount=Decimal("123.456"),
             category="Other",
             added_at=datetime.now()
         )
         
-        # The model should handle the precision as defined in the column
         assert expense.amount == Decimal("123.456")

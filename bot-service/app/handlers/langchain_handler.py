@@ -6,7 +6,6 @@ import json
 import os
 
 client = Groq(
-    # This is the default and can be omitted
     api_key=os.environ.get("GROQ_API_KEY"),
 )
 

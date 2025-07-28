@@ -28,7 +28,7 @@ class TestExpenseEndpoints:
     async def test_create_expense_invalid_data(self, async_client: AsyncClient):
         """Test creating expense with invalid data"""
         payload = {
-            "user_id": "",  # Invalid empty user_id
+            "user_id": "",
             "description": "Pizza",
             "amount": 25.50,
             "category": "Food",
@@ -37,7 +37,7 @@ class TestExpenseEndpoints:
         }
         
         response = await async_client.post("/api/expenses/", json=payload)
-        assert response.status_code == 500  # Service validation error
+        assert response.status_code == 500
 
     @pytest.mark.asyncio
     async def test_get_expenses(self, async_client: AsyncClient, test_expenses):
@@ -94,7 +94,6 @@ class TestAnalyticsEndpoints:
         assert response.status_code == 200
         data = response.json()
         
-        # Should include all expenses
         assert data["total_expenses"] == 70.50
 
     @pytest.mark.asyncio
@@ -147,7 +146,7 @@ class TestAnalyticsEndpoints:
         
         data = response.json()
         assert isinstance(data, list)
-        assert len(data) == 2  # Food and Transportation
+        assert len(data) == 2
         assert all("category" in item and "total" in item for item in data)
 
 
@@ -159,7 +158,6 @@ class TestHealthEndpoints:
         """Test readiness check endpoint"""
         response = await async_client.get("/health/ready")
         
-        # Should be ready since we have a working database
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "ready"
@@ -218,7 +216,6 @@ class TestErrorHandling:
         """Test missing required fields in request"""
         payload = {
             "description": "Pizza"
-            # Missing required fields
         }
         
         response = await async_client.post("/api/expenses/", json=payload)

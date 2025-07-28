@@ -12,7 +12,6 @@ from datetime import datetime, date
 from decimal import Decimal
 from unittest.mock import AsyncMock, patch
 
-# Set testing environment
 os.environ["TESTING"] = "1"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///./test.db"
 
@@ -26,7 +25,6 @@ def event_loop():
 @pytest_asyncio.fixture(scope="function")
 async def db_session():
     """Create a clean database session for each test"""
-    # Create tables
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
@@ -99,7 +97,6 @@ async def test_expenses(db_session, test_user):
     
     await db_session.commit()
     
-    # Refresh all expenses
     for expense in expenses:
         await db_session.refresh(expense)
     
@@ -109,7 +106,6 @@ async def test_expenses(db_session, test_user):
 def mock_langchain_handler():
     """Mock the langchain handler for consistent testing"""
     with patch('app.handlers.langchain_handler.categorize_expense') as mock:
-        # Return more predictable data for testing
         mock.return_value = ("Food", 25.50, "Pizza")
         yield mock
 

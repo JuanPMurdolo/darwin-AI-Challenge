@@ -6,14 +6,12 @@ from typing import Any, Dict
 def configure_logging(level: str = "INFO") -> None:
     """Configure structured logging with structlog"""
     
-    # Configure standard library logging
     logging.basicConfig(
         format="%(message)s",
         stream=sys.stdout,
         level=getattr(logging, level.upper()),
     )
-    
-    # Configure structlog
+
     structlog.configure(
         processors=[
             structlog.stdlib.filter_by_level,

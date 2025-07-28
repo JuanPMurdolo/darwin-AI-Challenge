@@ -106,7 +106,6 @@ class TestExpenseService:
         """Test creating expense with missing fields"""
         service = ExpenseService()
         
-        # Create expense data with missing fields
         class IncompleteExpenseData:
             user_id = None
             description = "Pizza"
