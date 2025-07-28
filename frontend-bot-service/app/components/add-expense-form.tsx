@@ -46,7 +46,9 @@ export function AddExpenseForm() {
 				description: formData.description,
 				amount: Number.parseFloat(formData.amount),
 				category: formData.category,
-				// Optionally add date if needed
+				user_id: "1",
+				telegram_id: "123456789",
+				text: formData.text,
 			})
 			toast({
 				title: "🎉 Success!",

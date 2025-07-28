@@ -187,15 +187,6 @@ cd connector-service
 npm run dev
 ```
 
-### Pruebas
-
-Prueba el servicio bot directamente:
-```bash
-curl -X POST http://localhost:8000/process-message \
-  -H "Content-Type: application/json" \
-  -d '{"telegram_id": "123456789", "message": "Café 5 dólares"}'
-```
-
 ## Buenas Prácticas Implementadas
 
 - ✅ **Arquitectura de Microservicios**: Separación de responsabilidades

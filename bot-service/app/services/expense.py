@@ -15,8 +15,12 @@ class ExpenseService:
         category = expense_data.category
         telegram_id = expense_data.telegram_id
         text = expense_data.text
-        if not all([user_id, description, amount, category, telegram_id, text]):
+        # Solo los campos obligatorios deben ser requeridos
+        if not all([user_id, description, amount, category, telegram_id]):
             raise ValueError("All fields are required to create an expense.")
+        # Si text es None o vacío, pasar una cadena vacía
+        if text is None:
+            text = ""
         return await self.expense_repo.add_expense(
             user_id=user_id,
             description=description,
