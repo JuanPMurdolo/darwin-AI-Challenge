@@ -41,12 +41,11 @@ class TestExpenseRepository:
         """Test getting expense by ID"""
         repo = ExpenseRepository()
         expense_id = test_expenses[0].id
-        
         expense = await repo.get_expense_by_id(expense_id)
-        
         assert expense is not None
-        assert expense.id == expense_id
-        assert expense.description == "Test Food Expense"
+        assert expense["id"] == expense_id
+        assert expense["description"] == "Test Food Expense"
+        assert "telegram_id" in expense
 
     @pytest.mark.asyncio
     async def test_delete_expense(self, test_expenses):
@@ -73,7 +72,11 @@ class TestExpenseRepository:
         )
         
         assert isinstance(result, dict)
-        assert result["message"] == "Expense updated successfully"
+        assert result["id"] == expense_id
+        assert result["description"] == "Updated Food"
+        assert result["amount"] == 30.00
+        assert result["category"] == "Food"
+        assert "telegram_id" in result
 
 
 class TestExpenseService:
