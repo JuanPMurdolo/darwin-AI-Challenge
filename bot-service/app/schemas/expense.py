@@ -12,7 +12,7 @@ class ExpenseInput(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "user_id": 1,
+                "user_id": "1",
                 "description": "Pizza",
                 "amount": 20.0,
                 "category": "Food",
