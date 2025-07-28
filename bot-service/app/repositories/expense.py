@@ -14,7 +14,7 @@ class ExpenseRepository:
             async with AsyncSessionLocal() as session:
                 result = await session.execute(select(User).where(User.telegram_id == telegram_id))
                 user = result.scalar_one_or_none()
-                print("Lookig for user with telegram_id:", telegram_id)
+                print("Looking for user with telegram_id:", telegram_id)
 
                 if not user:
                     print("❌ User not found, creating new user")
@@ -43,7 +43,6 @@ class ExpenseRepository:
                 await session.commit()
                 print("Expense committed to DB")
                 await session.refresh(expense)
-                # Attach telegram_id for response serialization
                 expense.telegram_id = user.telegram_id
                 return expense
 
